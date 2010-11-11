@@ -1,1 +1,5 @@
-clamity.pro.user
+*.o
+/clamity
+/clamity.pro.user
+/Makefile
+clamity*txt
