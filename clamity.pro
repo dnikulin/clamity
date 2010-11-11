@@ -11,3 +11,5 @@ SOURCES += \
 
 LIBS += \
     -lOpenCL
+
+QMAKE_CXXFLAGS += -DCLAMITY_DEBUG

@@ -60,6 +60,12 @@ int main(int argc, char **argv) {
         for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
             cl::Device &device = devices.at(ndevice);
 
+#ifdef CLAMITY_DEBUG
+            // Invoke tests in order, log to stdout
+            testDevice(device, std::cout);
+            continue;
+#endif
+
             // Fork a child process to test this device
             const pid_t pid = ::fork();
 
