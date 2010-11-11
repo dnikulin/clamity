@@ -36,6 +36,9 @@ static std::string logFileName(size_t nplatform, size_t ndevice, cl::Device &dev
 
 static void testDevice(cl::Device &device, std::ostream &logfile) {
     logfile << "clamity test started for " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+    logfile << std::endl;
+
+    logInfo(device, logfile);
 }
 
 int main(int argc, char **argv) {

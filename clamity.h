@@ -27,4 +27,7 @@
 #include <string>
 #include <vector>
 
+// info.cpp
+void logInfo(cl::Device &device, std::ostream &logfile);
+
 #endif // CLAMITY_H

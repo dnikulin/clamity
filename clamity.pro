@@ -6,7 +6,8 @@ HEADERS += \
     clamity.h
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    info.cpp
 
 LIBS += \
     -lOpenCL
