@@ -17,8 +17,7 @@
 
 #include "clamity.h"
 
-void logInfo(cl::Device &device, std::ostream &logfile) {
-    cl::Platform platform = device.getInfo<CL_DEVICE_PLATFORM>();
+void Clamity::logInfo() {
     logfile << "Platform" << std::endl;
     logfile << "  Vendor            " << platform.getInfo<CL_PLATFORM_VENDOR>() << std::endl;
     logfile << "  Name              " << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;

@@ -3,11 +3,12 @@ CONFIG  += thread warn_on release
 QT -= core gui
 
 HEADERS += \
-    clamity.h
+    clamity.h \
 
 SOURCES += \
     main.cpp \
-    info.cpp
+    info.cpp \
+    alloc.cpp \
 
 LIBS += \
     -lOpenCL
