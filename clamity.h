@@ -30,12 +30,13 @@
 
 // Structure to bind together common objects during testing
 struct Clamity {
-    std::ostream      &logfile;
+    std::ostream               &logfile;
 
-    cl::Platform       platform;
-    cl::Device         device;
-    cl::Context        context;
-    cl::CommandQueue   queue;
+    cl::Platform                platform;
+    cl::Device                  device;
+    std::vector<cl::Device>     devices;
+    cl::Context                 context;
+    cl::CommandQueue            queue;
 
     // main.cpp
     Clamity(std::ostream &logfile, cl::Device &device);
@@ -46,6 +47,16 @@ struct Clamity {
 
     // alloc.cpp
     void testAlloc();
+
+    // basic.cpp
+    void testBasic();
+
+    // tools.cpp
+    void reportCompile(cl::Program &program);
+    void compile(cl::Program &program, const char *path);
 };
+
+// tools.cpp
+std::string readFile(const char *path);
 
 #endif // CLAMITY_H

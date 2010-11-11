@@ -7,8 +7,10 @@ HEADERS += \
 
 SOURCES += \
     main.cpp \
+    tools.cpp \
     info.cpp \
     alloc.cpp \
+    basic.cpp \
 
 LIBS += \
     -lOpenCL
