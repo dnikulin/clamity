@@ -11,6 +11,7 @@ SOURCES += \
     info.cpp \
     alloc.cpp \
     basic.cpp \
+    membasic.cpp \
 
 LIBS += \
     -lOpenCL
