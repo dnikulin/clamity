@@ -19,12 +19,12 @@
 
 void Clamity::memBasic() {
     //static const size_t vecCount = 8192;
-    static const size_t vecSize = vecCount * sizeof(cl_uint);
+    //static const size_t vecSize = vecCount * sizeof(cl_uint);
     static const size_t groupSize = 256;
 
 
-    size_t memSize  = device.getInfo(CL_DEVICE_GLOBAL_MEM_SIZE);
-    size_t memAlloc = device.getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE);
+    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
 
     //Work out group size
     size_t vecCount  = memAlloc / sizeof(cl_uint);
@@ -43,22 +43,22 @@ void Clamity::memBasic() {
     logfile << std::endl;
 
     cl::Program program;
-    compile(program, "basic.cl");
+    compile(program, "membasic.cl");
 
     logfile.flush();
 
-    cl::Kernel kern_membasic(program, "testShiftCL");
+    cl::Kernel kern_membasic(program, "testMemCL");
 
-    std::vector<cl_uint> data(groupSize);
-    for (size_t i = 0; i < groupSize; i++)
+    std::vector<cl_uint> data(vecCount);
+    for (size_t i = 0; i < vecCount; i++)
         data.at(i) = 1;
 
+try {
     cl::Buffer memoryOne(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
     cl::Buffer memoryTwo(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
     cl::Buffer memoryThree(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
     queue.enqueueWriteBuffer(memoryOne, CL_TRUE, 0, vecCount * sizeof(cl_uint), data.data());
     queue.enqueueWriteBuffer(memoryTwo, CL_TRUE, 0, vecCount * sizeof(cl_uint), data.data());
-    queue.enqueueWriteBuffer(memoryThree, CL_TRUE, 0, vecCount * sizeof(cl_uint), data.data());
 
     kern_membasic.setArg(0, memoryOne);
     kern_membasic.setArg(1, memoryTwo);
@@ -66,7 +66,13 @@ void Clamity::memBasic() {
 
     queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
 
-    queue.enqueueReadBuffer(memory, CL_TRUE, 0, vecSize, data.data());
+    queue.enqueueReadBuffer(memoryThree, CL_TRUE, 0, vecCount * sizeof(cl_uint) , data.data());
+}
+catch(cl::Error error) {
+       logfile <<"Test Failed --- ";
+       logfile << error.what() << "(" << error.err() << ")" << std::endl;
+       return;
+    }
 
     bool good = true;
 

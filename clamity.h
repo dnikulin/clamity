@@ -50,6 +50,7 @@ struct Clamity {
 
     // basic.cpp
     void testBasic();
+    void memBasic();
 
     // tools.cpp
     void reportCompile(cl::Program &program);
