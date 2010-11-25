@@ -15,6 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-__kernel void testMemCL(__global uint *memoryOne, __global uint *memoryTwo, __global uint *memoryThree) {
-    memoryThree[get_global_id(0)]  = memoryOne[get_global_id(0)] + memoryTwo[get_global_id(0)];
+__kernel void testMemCL(
+    __global uint *memoryC,
+    __global const uint *memoryA,
+    __global const uint *memoryB
+) {
+    size_t id = get_global_id(0);
+    memoryC[id] = memoryA[id] + memoryB[id];
 }

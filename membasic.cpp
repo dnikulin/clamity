@@ -18,29 +18,32 @@
 #include "clamity.h"
 
 void Clamity::memBasic() {
-    //static const size_t vecCount = 8192;
-    //static const size_t vecSize = vecCount * sizeof(cl_uint);
     static const size_t groupSize = 256;
+    static const unsigned int maxShift = 32;  // We can only shift up to 31 places
+
+    unsigned int currShift = 0;  // How many times we have shifted already
+    unsigned int shiftedVal = 1;
 
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
 
-    //Work out group size
+    // Work out group size
     size_t vecCount  = memAlloc / sizeof(cl_uint);
-  
-    //Is the max alloc size a multiple of 4?
+
+    // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
 
-    if(maxAllocMultiple!=4)
-    {
-       logfile << " maxAllocMultiple not a multiple of 4" <<std::endl;
-    }
+
+    unsigned long memorySize = vecCount * sizeof(cl_uint);
 
 
     logfile << "Basic memory tests" << std::endl;
     logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
+
+    if (maxAllocMultiple != 4)
+       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
     compile(program, "membasic.cl");
@@ -51,42 +54,53 @@ void Clamity::memBasic() {
 
     std::vector<cl_uint> data(vecCount);
     for (size_t i = 0; i < vecCount; i++)
-        data.at(i) = 1;
+        data.at(i) = shiftedVal;
 
-try {
-    cl::Buffer memoryOne(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
-    cl::Buffer memoryTwo(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
-    cl::Buffer memoryThree(context, CL_MEM_READ_WRITE, vecCount * sizeof(cl_uint));
-    queue.enqueueWriteBuffer(memoryOne, CL_TRUE, 0, vecCount * sizeof(cl_uint), data.data());
-    queue.enqueueWriteBuffer(memoryTwo, CL_TRUE, 0, vecCount * sizeof(cl_uint), data.data());
+    cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
-    kern_membasic.setArg(0, memoryOne);
-    kern_membasic.setArg(1, memoryTwo);
-    kern_membasic.setArg(2, memoryThree);
+    do {
+        try {
+            queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, data.data());
+            queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, data.data());
 
-    queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+            kern_membasic.setArg(0, memoryC);
+            kern_membasic.setArg(1, memoryA);
+            kern_membasic.setArg(2, memoryB);
 
-    queue.enqueueReadBuffer(memoryThree, CL_TRUE, 0, vecCount * sizeof(cl_uint) , data.data());
-}
-catch(cl::Error error) {
-       logfile <<"Test Failed --- ";
-       logfile << error.what() << "(" << error.err() << ")" << std::endl;
-       return;
-    }
+            queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
 
-    bool good = true;
-
-    for (size_t i = 0; i < vecCount; i++) {
-        const cl_uint have = data.at(i);
-        const cl_uint want =  2; // (i % modulo) << shiftSize;
-
-        if (have != want ) {
-            good = false;
-            logfile << "    Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
+        } catch (cl::Error error) {
+               logfile << "Test Failed --- ";
+               logfile << error.what() << "(" << error.err() << ")" << std::endl;
+               return;
         }
-    }
 
-    if (good == true)
-        logfile << "    Passed" << std::endl;
+        bool good = true;
+
+        for (size_t i = 0; i < vecCount; i++) {
+            const cl_uint have = data.at(i);
+            const cl_uint want = shiftedVal * 2 ; // (i % modulo) << shiftSize;
+
+            if (have != want) {
+                good = false;
+                logfile << "    Incorrect value at " << i
+                        << " (have " << have << ", want " << want << ")" << std::endl;
+                return;
+            }
+        }
+
+        if (good == true)
+            logfile << "Shift: " << currShift <<"    Passed" << std::endl;
+
+        currShift++;
+
+        for (size_t i = 0; i < vecCount; i++)
+            data.at(i) = shiftedVal << currShift;
+
+        shiftedVal <<= currShift;
+
+    } while (currShift < maxShift);
 }
