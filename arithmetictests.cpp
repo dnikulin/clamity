@@ -40,7 +40,7 @@ bool CheckResults(cl_float * data, cl_float * wanted ,unsigned int vecCount, std
         const cl_float have = data[i];
         const cl_float want = wanted[i] ; 
         if (!isEqual(have, want)) {
-           logfile << "    Incorrect value at " << i
+           logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
                     << " (have " << have << ", want " << want << ")" << std::endl;
             return false;
         }
@@ -69,6 +69,11 @@ void Clamity::basicALU() {
     logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
 
+    if(device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU) {
+       logfile << "CPU device detected skipping.... " << std::endl;
+       return;
+    }
+    
     if (maxAllocMultiple != 4)
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
@@ -286,7 +291,7 @@ void Clamity::basicADD() {
 
         if (have != want) {
             good = false;
-            logfile << "    Incorrect value at " << i
+            logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
                     << " (have " << have << ", want " << want << ")" << std::endl;
             return;
         }
@@ -409,7 +414,7 @@ void Clamity::basicMULT() {
 
        if (have != want) {
            good = false;
-           logfile << "    Incorrect value at " << i
+           logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
                    << " (have " << have << ", want " << want << ")" << std::endl;
            return;
        }

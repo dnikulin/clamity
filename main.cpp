@@ -54,7 +54,11 @@ void Clamity::testDevice() {
     testAlloc();
     testBasic();
     memBasic();
-
+    memBasicAnd();
+    basicADD();
+    basicMULT();
+    basicFMAD();
+    basicALU();
     // Flush log now, in case of an exception or crash after
     logfile.flush();
 

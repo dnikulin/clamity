@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#define MEMORY_FRACTION 2
+#define MEMORY_FRACTION 1
 
 
 // Structure to bind together common objects during testing
