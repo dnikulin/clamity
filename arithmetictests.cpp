@@ -22,12 +22,24 @@
 #include <stdlib.h>
 #include <limits.h>
 
+
+#include <cmath>  /* for std::abs(double) */
+
+inline bool isEqual(double x, double y)
+{
+  const double epsilon = 1e-5; /* some small number such as 1e-5 */;
+  return std::abs(x - y) <= epsilon * std::abs(x);
+  // see Knuth section 4.2.2 pages 217-218
+} 
+ 
+
+ 
 bool CheckResults(cl_float * data, cl_float * wanted ,unsigned int vecCount, std::ostream  &logfile) {
   
   for (size_t i = 0; i < vecCount; i++) {
         const cl_float have = data[i];
         const cl_float want = wanted[i] ; 
-        if (have != want) {
+        if (!isEqual(have, want)) {
            logfile << "    Incorrect value at " << i
                     << " (have " << have << ", want " << want << ")" << std::endl;
             return false;
@@ -36,12 +48,182 @@ bool CheckResults(cl_float * data, cl_float * wanted ,unsigned int vecCount, std
   return true;
 }
 
+void Clamity::basicALU() {
+    static const size_t groupSize = 256;
+
+    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
+
+    // Work out group size
+    size_t vecCount  = memAlloc / sizeof(cl_float);
+
+    // Is the max alloc size a multiple of 4?
+    size_t maxAllocMultiple = memSize / memAlloc;
+
+
+    unsigned long memorySize = vecCount * sizeof(cl_float);
+
+
+    logfile << "Basic ALU tests" << std::endl;
+    logfile << "Testing for A = A + (B * C) - Executing over 65535 iterations" <<std::endl;
+    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << std::endl;
+
+    if (maxAllocMultiple != 4)
+       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+
+    cl::Program program;
+    compile(program, "basicsum.cl");
+
+    logfile.flush();
+
+    cl::Kernel kern_membasic(program, "testALU");
+
+    //std::vector<cl_float4> data(vecCount);
+    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+  
+    for (size_t i = 0; i < vecCount; i++) {
+        data[i]  =  rand() % UINT_MAX;
+        dataA[i] =  rand() % ( UINT_MAX /2 ) ;
+        dataB[i] =  rand() % ( UINT_MAX /2 ) ;
+    }
+    
+    cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
+
+    logfile << "Executing test kernel " << std::endl;
+    
+     try {
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
+        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+
+        kern_membasic.setArg(0, memoryC);
+        kern_membasic.setArg(1, memoryA);
+        kern_membasic.setArg(2, memoryB);
+
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+    } catch (cl::Error error) {
+           logfile << "Test Failed --- ";
+           logfile << error.what() << "(" << error.err() << ")" << std::endl;
+           free(data);
+	    free(dataA);
+	    free(dataB);
+	    free(results);
+           return;
+    }
+    
+    logfile<<"  Test Passed"<<std::endl;
+    
+    
+    free(data);
+    free(dataA);
+    free(dataB);
+    free(results);
+}
+
+ 
+
+void Clamity::basicFMAD() {
+    static const size_t groupSize = 256;
+
+    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
+
+    // Work out group size
+    size_t vecCount  = memAlloc / sizeof(cl_float);
+
+    // Is the max alloc size a multiple of 4?
+    size_t maxAllocMultiple = memSize / memAlloc;
+
+
+    unsigned long memorySize = vecCount * sizeof(cl_float);
+
+
+    logfile << "Basic ALU tests" << std::endl;
+    logfile << "Testing for A = A + (B * C)" <<std::endl;
+    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << std::endl;
+
+    if (maxAllocMultiple != 4)
+       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+
+    cl::Program program;
+    compile(program, "basicsum.cl");
+
+    logfile.flush();
+
+    cl::Kernel kern_membasic(program, "BasicFMAD");
+
+    //std::vector<cl_float4> data(vecCount);
+    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+  
+    logfile <<"Creating results table"<<std::endl;
+    
+     for (size_t i = 0; i < vecCount; i++) {
+        data[i]  =  rand() % UINT_MAX;
+        dataA[i] =  rand() % ( UINT_MAX /2 ) ;
+        dataB[i] =  rand() % ( UINT_MAX /2 ) ;
+	results[i] =  data[i] + ( dataA[i] * dataB[i]);   //Verify against the CPU results
+    }
+    
+    cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
+    cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
+
+    logfile << "Executing test kernel " << std::endl;
+    
+     try {
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
+        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+
+        kern_membasic.setArg(0, memoryC);
+        kern_membasic.setArg(1, memoryA);
+        kern_membasic.setArg(2, memoryB);
+
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+    } catch (cl::Error error) {
+           logfile << "Test Failed --- ";
+           logfile << error.what() << "(" << error.err() << ")" << std::endl;
+           free(data);
+	    free(dataA);
+	    free(dataB);
+	    free(results);
+           return;
+    }
+    logfile << "Verifying results" << std::endl;
+    if(!CheckResults(data,results,vecCount,logfile))
+       logfile<<"  Test Failed!"<<std::endl;
+    else
+       logfile<<"  Test Passed"<<std::endl;
+    
+    
+    free(data);
+    free(dataA);
+    free(dataB);
+    free(results);
+}
+
+
+
 
 void Clamity::basicADD() {
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
 
     // Work out group size
     size_t vecCount  = memAlloc / sizeof(cl_float);
@@ -92,7 +274,7 @@ void Clamity::basicADD() {
     } catch (cl::Error error) {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
-           free(data);
+          free(data);
            return;
     }
 
@@ -137,6 +319,9 @@ void Clamity::basicADD() {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
            free(data);
+	   free(dataA);
+	   free(dataB);
+	   free(results);
            return;
     }
     if(!CheckResults(data,results,vecCount,logfile))
@@ -148,13 +333,14 @@ void Clamity::basicADD() {
     free(data);
     free(dataA);
     free(dataB);
+    free(results);
 }
 
 void Clamity::basicMULT() {
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
 
     // Work out group size
     size_t vecCount  = memAlloc / sizeof(cl_float);
@@ -212,6 +398,7 @@ void Clamity::basicMULT() {
            free(data);
            free(dataA);
            free(dataB);
+	   free(results);
            return;
     }
     
@@ -257,6 +444,7 @@ void Clamity::basicMULT() {
            free(data);
            free(dataA);
            free(dataB);
+	   free(results);
            return;
     }
     
@@ -269,4 +457,5 @@ void Clamity::basicMULT() {
     free(data);
     free(dataA);
     free(dataB);
+    free(results);
 }

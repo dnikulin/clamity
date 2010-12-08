@@ -28,6 +28,9 @@
 #include <string>
 #include <vector>
 
+#define MEMORY_FRACTION 2
+
+
 // Structure to bind together common objects during testing
 struct Clamity {
     std::ostream               &logfile;
@@ -51,7 +54,11 @@ struct Clamity {
     // basic.cpp
     void testBasic();
     void memBasic();
-
+    void memBasicAnd();
+    void basicADD();
+    void basicMULT();
+    void basicFMAD();
+    void basicALU();
     // tools.cpp
     void reportCompile(cl::Program &program);
     void compile(cl::Program &program, const char *path);

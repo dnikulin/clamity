@@ -12,6 +12,8 @@ SOURCES += \
     alloc.cpp \
     basic.cpp \
     membasic.cpp \
+    memand.cpp \
+    arithmetictests.cpp \
 
 LIBS += \
     -lOpenCL

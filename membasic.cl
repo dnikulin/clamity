@@ -23,3 +23,14 @@ __kernel void testMemCL(
     size_t id = get_global_id(0);
     memoryC[id] = memoryA[id] + memoryB[id];
 }
+
+
+__kernel void testMemAndCL(
+    __global uint *memoryC,
+    __global const uint *memoryA,
+    __global const uint *memoryB
+) {
+  size_t id = get_global_id(0);
+  memoryC[id] = memoryA[id] & memoryB[id];
+}
+
