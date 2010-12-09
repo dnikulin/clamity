@@ -113,7 +113,9 @@ void Clamity::basicALU() {
 
         queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
 
+	queue.finish();
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+	
     } catch (cl::Error error) {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;

@@ -86,7 +86,7 @@ void Clamity::memBasic() {
 
             if (have != want) {
                 good = false;
-                logfile << "    Incorrect value at " << i
+                logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
                         << " (have " << have << ", want " << want << ")" << std::endl;
                 return;
             }
