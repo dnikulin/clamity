@@ -83,27 +83,25 @@ int main(int argc, char **argv) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
-    for (size_t nplatform = 0; nplatform < platforms.size(); nplatform++) {
-        cl::Platform platform = platforms.at(nplatform);
+    try {
+      for (size_t nplatform = 0; nplatform < platforms.size(); nplatform++) {
+	    cl::Platform platform = platforms.at(nplatform);
 
-        // Discover all OpenCL devices of any type
-        std::vector<cl::Device> devices;
-        platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+	  // Discover all OpenCL devices of any type
+	  std::vector<cl::Device> devices;
+	  platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
-        for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
-            cl::Device device = devices.at(ndevice);
+	  for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
+	      cl::Device device = devices.at(ndevice);
 
 #ifdef CLAMITY_DEBUG
-	    try {
-            // Invoke tests in order, log to stdout
-               Clamity test(std::cout, device);
-               test.testDevice();
+	    
+	      // Invoke tests in order, log to stdout
+	     Clamity test(std::cout, device);
+	     test.testDevice();
                continue;
-	    }
-	    catch (cl::Error error) {
-               std::cout << "Test Failed --- ";
-               std::cout << error.what() << "(" << error.err() << ")" << std::endl;
-	    }
+	    
+	   
 #endif
 
             // Fork a child process to test this device
@@ -133,7 +131,13 @@ int main(int argc, char **argv) {
                 nchildren++;
                 std::cerr << "PID " << pid << " will write to " << logname << std::endl;
             }
+	  }
         }
+       
+    }
+    catch (cl::Error error) {
+         std::cout << "Test Failed --- ";
+         std::cout << error.what() << "(" << error.err() << ")" << std::endl;
     }
 
     while (nchildren > 0) {
