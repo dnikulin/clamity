@@ -3,7 +3,8 @@
 
 class TestTemplate
 {
-	public virtual bool RunTest(){return true;};
+public:
+	virtual bool RunTest(){return true;};
 };
 
 
