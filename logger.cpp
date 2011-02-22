@@ -21,13 +21,17 @@
 
 #include <boost/bind.hpp>
 
-static void logLine(LogLevel threshold, std::string const &prefix,
-                    LogLevel level, std::string const &line) {
+static void logLine(LogLevel threshold, std::string const & prefix, std::ostream * stream,
+                    LogLevel level, std::string const & line) {
 
     if (level >= threshold)
-        std::cerr << prefix << line << std::endl;
+        *stream << prefix << line << std::endl;
 }
 
-Logger makeSimpleLogger(LogLevel threshold, std::string const &prefix) {
-    return boost::bind(logLine, threshold, prefix, _1, _2);
+Logger makeStreamLogger(LogLevel threshold, std::string const & prefix, std::ostream * stream) {
+    return boost::bind(logLine, threshold, prefix, stream, _1, _2);
+}
+
+Logger makeSimpleLogger(LogLevel threshold, std::string const & prefix) {
+    return makeStreamLogger(threshold, prefix, &std::cerr);
 }
