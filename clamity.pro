@@ -4,6 +4,8 @@ QT -= core gui
 
 HEADERS += \
     clamity.h \
+    testpipe.h \
+    TestTemplate.h
 
 SOURCES += \
     main.cpp \
@@ -14,6 +16,7 @@ SOURCES += \
     membasic.cpp \
     memand.cpp \
     arithmetictests.cpp \
+    testpipe.cpp
 
 LIBS += \
     -lOpenCL
