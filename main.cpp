@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -52,8 +52,8 @@ void Clamity::testDevice() {
     std::string name = device.getInfo<CL_DEVICE_NAME>();
 
     logSystem(LOG_INFO,str(format("Clamity test started for %s ") % name));
-    logfile << "clamity test started for " << name << std::endl;
-    logfile << std::endl;
+    // logfile << "clamity test started for " << name << std::endl;
+    //logfile << std::endl;
 
     // Log device info
     // In case of a bug report, this is critical

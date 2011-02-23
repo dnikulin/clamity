@@ -16,6 +16,9 @@
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "clamity.h"
+#include <boost/function.hpp>
+#include <boost/format.hpp>
+
 
 void Clamity::testBasic() {
     static const size_t vecCount = 8192;
@@ -24,14 +27,14 @@ void Clamity::testBasic() {
     static const cl_uint modulo = 1337;
     static const cl_uint shiftSize = 7;
 
-    logfile << "Basic sanity tests" << std::endl;
-    logfile << std::endl;
+    logSystem(LOG_INFO, "Basic sanity tests");
+    
 
     cl::Program program;
     compile(program, "basic.cl");
 
-    logfile << "  Unsigned shift test" << std::endl;
-    logfile.flush();
+    logSystem(LogLevel::LOG_INFO, "  Unsigned shift test");
+    
 
     cl::Kernel kern_shift(program, "testShiftCL");
 
@@ -57,11 +60,11 @@ void Clamity::testBasic() {
 
         if (have != want) {
             good = false;
-            logfile << "    Incorrect at offset " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            logSystem(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ",%i
+                      % have % want )));
         }
     }
 
     if (good == true)
-        logfile << "    Passed" << std::endl;
+        logSystem(LOG_INFO,"    Passed");
 }

@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -18,20 +18,20 @@
 #include "clamity.h"
 
 void Clamity::logInfo() {
-    logfile << "Platform" << std::endl;
-    logfile << "  Vendor            " << platform.getInfo<CL_PLATFORM_VENDOR>() << std::endl;
-    logfile << "  Name              " << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
-    logfile << "  Version           " << platform.getInfo<CL_PLATFORM_VERSION>() << std::endl;
-    logfile << "  Profile           " << platform.getInfo<CL_PLATFORM_PROFILE>() << std::endl;
-    logfile << std::endl;
+    logSystem(LOG_INFO,"Platform"); 
+    logSystem(LOG_INFO,str(format("  Vendor  %s" % platform.getInfo<CL_PLATFORM_VENDOR>()  )));
+    logSystem(LOG_INFO,str(format("  Name    %s" % platform.getInfo<CL_PLATFORM_NAME>()    )));
+    logSystem(LOG_INFO,str(format("  Version %s" % platform.getInfo<CL_PLATFORM_VERSION>() )));
+    logSystem(LOG_INFO,str(format("  Profile %s" % platform.getInfo<CL_PLATFORM_PROFILE>() )));
+    logSystem(LOG_INFO,"");
 
-    logfile << "Device" << std::endl;
-    logfile << "  Vendor            " << device.getInfo<CL_DEVICE_VENDOR>() << std::endl;
-    logfile << "  Name              " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
-    logfile << "  Version           " << device.getInfo<CL_DEVICE_VERSION>() << std::endl;
-    logfile << "  Type              " << device.getInfo<CL_DEVICE_TYPE>() << std::endl;
-    logfile << "  Profile           " << device.getInfo<CL_DEVICE_PROFILE>() << std::endl;
-    logfile << std::endl;
+    logSystem(LOG_INFO,"Device");
+    logSystem(LOG_INFO,str(format("  Vendor  %s" % device.getInfo<CL_DEVICE_VENDOR>() )));
+    logSystem(LOG_INFO,str(format("  Name    %s" % device.getInfo<CL_DEVICE_NAME>()   )));
+    logSystem(LOG_INFO,str(format("  Version %s" % device.getInfo<CL_DEVICE_VERSION>() )));
+    logSystem(LOG_INFO,str(format("  Type    %s" % device.getInfo<CL_DEVICE_TYPE>() )));
+    logSystem(LOG_INFO,str(format("  Profile %s" % device.getInfo<CL_DEVICE_PROFILE>() )));
+    
 
     // TODO: Log more device info
 }
