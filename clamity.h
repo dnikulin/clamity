@@ -30,10 +30,12 @@
 
 #define MEMORY_FRACTION 1
 
+#include "logger.h"
 
 // Structure to bind together common objects during testing
 struct Clamity {
     std::ostream               &logfile;
+    Logger                      logSystem;
 
     cl::Platform                platform;
     cl::Device                  device;
