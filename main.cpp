@@ -29,11 +29,11 @@
 #include <boost/function.hpp>
 #include <boost/format.hpp>
 
+using boost::format;
 
 Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     : logfile(_logfile), device(_device) {
 
-    qDebug()
 
     // Retrieve platform from device
     platform = device.getInfo<CL_DEVICE_PLATFORM>();
@@ -45,13 +45,13 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
 
     // Create command queue
     queue = cl::CommandQueue(context, device);
-    loggerSystem = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
+    logSystem = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
 }
 
 void Clamity::testDevice() {
     std::string name = device.getInfo<CL_DEVICE_NAME>();
 
-    loggerSystem(LOG_INFO,str(format("Clamity test started for %s ") % name));
+    logSystem(LOG_INFO,str(format("Clamity test started for %s ") % name));
     logfile << "clamity test started for " << name << std::endl;
     logfile << std::endl;
 
