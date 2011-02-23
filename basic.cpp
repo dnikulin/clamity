@@ -19,6 +19,8 @@
 #include <boost/function.hpp>
 #include <boost/format.hpp>
 
+using boost::format;
+using namespace boost;
 
 void Clamity::testBasic() {
     static const size_t vecCount = 8192;
@@ -33,7 +35,7 @@ void Clamity::testBasic() {
     cl::Program program;
     compile(program, "basic.cl");
 
-    logSystem(LogLevel::LOG_INFO, "  Unsigned shift test");
+    logSystem(LOG_INFO, "  Unsigned shift test");
     
 
     cl::Kernel kern_shift(program, "testShiftCL");
@@ -60,8 +62,7 @@ void Clamity::testBasic() {
 
         if (have != want) {
             good = false;
-            logSystem(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ",%i
-                      % have % want )));
+            logSystem(LOG_ERROR,str(format("    Incorrect at offset %d (have: %d want: %d) ")%i %have %want));
         }
     }
 
