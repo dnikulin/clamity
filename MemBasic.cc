@@ -43,7 +43,7 @@ void Clamity::memBasic() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "membasic.cl");
+    compile(program, "MemBasic.cl");
 
     logfile.flush();
 

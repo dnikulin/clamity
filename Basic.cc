@@ -33,7 +33,7 @@ void Clamity::testBasic() {
     logSystem(LOG_INFO, "Basic sanity tests");
 
     cl::Program program;
-    compile(program, "basic.cl");
+    compile(program, "Basic.cl");
 
     logSystem(LOG_INFO, "  Unsigned shift test");
 

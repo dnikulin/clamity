@@ -74,7 +74,7 @@ void Clamity::basicALU() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "basicsum.cl");
+    compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -152,7 +152,7 @@ void Clamity::basicFMAD() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "basicsum.cl");
+    compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -236,7 +236,7 @@ void Clamity::basicADD() {
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "basicsum.cl");
+    compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -351,7 +351,7 @@ void Clamity::basicMULT() {
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "basicsum.cl");
+    compile(program, "BasicSum.cl");
 
     logfile.flush();
 
