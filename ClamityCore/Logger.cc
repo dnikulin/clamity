@@ -24,8 +24,14 @@
 static void logLine(LogLevel threshold, std::string const & prefix, std::ostream * stream,
                     LogLevel level, std::string const & line) {
 
-    if (level >= threshold)
-        *stream << prefix << ": " << LOG_PREFIX[level] << ": " << line << std::endl;
+    if (level >= threshold) {
+        *stream
+            << prefix << ": "
+            << LOG_PREFIX[level] << ": "
+            << line
+            << std::endl
+            << std::flush;
+    }
 }
 
 Logger makeStreamLogger(LogLevel threshold, std::string const & prefix, std::ostream * stream) {
