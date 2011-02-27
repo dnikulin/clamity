@@ -4,8 +4,6 @@ QT -= core gui
 
 HEADERS += \
     Clamity.hh \
-    TestPipe.hh \
-    TestTemplate.hh \
     Logger.hh
 
 SOURCES += \
@@ -17,7 +15,6 @@ SOURCES += \
     MemBasic.cc \
     MemAnd.cc \
     Arithmetic.cc \
-    TestPipe.cc \
     Logger.cc
 
 LIBS += \
