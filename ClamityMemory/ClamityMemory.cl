@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010-2011 Dmitri Nikulin, Enzo Reyes
 //
 // This file is part of clamity.
 //
@@ -15,6 +15,20 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-__kernel void testShiftCL(__global uint *memory, uint size) {
-    memory[get_global_id(0)] <<= size;
+__kernel void testMemCL(
+    __global uint *memoryC,
+    __global const uint *memoryA,
+    __global const uint *memoryB
+) {
+    size_t id = get_global_id(0);
+    memoryC[id] = memoryA[id] + memoryB[id];
+}
+
+__kernel void testMemAndCL(
+    __global uint *memoryC,
+    __global const uint *memoryA,
+    __global const uint *memoryB
+) {
+  size_t id = get_global_id(0);
+  memoryC[id] = memoryA[id] & memoryB[id];
 }

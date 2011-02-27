@@ -33,7 +33,6 @@ public:
     cl::Device                  device;
     std::vector<cl::Device>     devices;
     cl::Context                 context;
-    cl::CommandQueue            queue;
 
     // Main.cc
     Clamity(std::ostream &logfile, cl::Device &device);

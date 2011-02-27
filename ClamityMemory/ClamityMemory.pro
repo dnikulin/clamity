@@ -16,9 +16,13 @@ LIBS +=                         \
 
 HEADERS +=                      \
     ClamityMemory.hh            \
+    ClamityMemory.cl            \
 
 SOURCES +=                      \
     Alloc.cc                    \
     ClamityMemory.cc            \
     MemAnd.cc                   \
     MemBasic.cc                 \
+
+RESOURCES +=                    \
+    ClamityMemory.qrc           \

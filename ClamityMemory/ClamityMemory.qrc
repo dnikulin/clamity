@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/clamity/memory">
+        <file>ClamityMemory.cl</file>
+    </qresource>
+</RCC>

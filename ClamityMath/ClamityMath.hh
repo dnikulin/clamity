@@ -39,4 +39,6 @@ public:
     void basicMULT(Clamity &subject);
 };
 
+static const char * const ClamityMathCL = ":/clamity/math/ClamityMath.cl";
+
 #endif // CLAMITY_PLUGIN_MATH_HH

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/clamity/math">
+        <file>ClamityMath.cl</file>
+    </qresource>
+</RCC>

@@ -49,7 +49,7 @@ static bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCou
 void ClamityMath::basicALU(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     static const size_t groupSize = 256;
@@ -79,7 +79,7 @@ void ClamityMath::basicALU(Clamity &subject) {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    subject.compile(program, "BasicSum.cl");
+    subject.compile(program, ClamityMathCL);
 
     logfile.flush();
 
@@ -137,7 +137,7 @@ void ClamityMath::basicALU(Clamity &subject) {
 void ClamityMath::basicFMAD(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     static const size_t groupSize = 256;
@@ -162,7 +162,7 @@ void ClamityMath::basicFMAD(Clamity &subject) {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    subject.compile(program, "BasicSum.cl");
+    subject.compile(program, ClamityMathCL);
 
     logfile.flush();
 
@@ -226,7 +226,7 @@ void ClamityMath::basicFMAD(Clamity &subject) {
 void ClamityMath::basicADD(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     static const size_t groupSize = 256;
@@ -251,7 +251,7 @@ void ClamityMath::basicADD(Clamity &subject) {
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    subject.compile(program, "BasicSum.cl");
+    subject.compile(program, ClamityMathCL);
 
     logfile.flush();
 
@@ -346,7 +346,7 @@ void ClamityMath::basicADD(Clamity &subject) {
 void ClamityMath::basicMULT(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     static const size_t groupSize = 256;
@@ -371,7 +371,7 @@ void ClamityMath::basicMULT(Clamity &subject) {
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    subject.compile(program, "BasicSum.cl");
+    subject.compile(program, ClamityMathCL);
 
     logfile.flush();
 

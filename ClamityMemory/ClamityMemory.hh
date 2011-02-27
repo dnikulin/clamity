@@ -37,4 +37,6 @@ public:
     void memBasicAnd(Clamity &subject);
 };
 
+static const char * const ClamityMemoryCL = ":/clamity/memory/ClamityMemory.cl";
+
 #endif // CLAMITY_PLUGIN_MEMORY_HH

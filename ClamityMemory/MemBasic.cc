@@ -20,7 +20,7 @@
 void ClamityMemory::memBasic(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     static const size_t groupSize = 256;
@@ -48,7 +48,7 @@ void ClamityMemory::memBasic(Clamity &subject) {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    subject.compile(program, "MemBasic.cl");
+    subject.compile(program, ClamityMemoryCL);
 
     logfile.flush();
 

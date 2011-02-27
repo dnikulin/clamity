@@ -22,7 +22,7 @@
 void ClamityMemory::testAlloc(Clamity &subject) {
     std::ostream &logfile = subject.logfile;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     logfile << "Memory allocation" << std::endl;

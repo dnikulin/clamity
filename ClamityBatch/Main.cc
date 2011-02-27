@@ -37,8 +37,7 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     devices.push_back(device);
     context = cl::Context(devices);
 
-    // Create command queue
-    queue = cl::CommandQueue(context, device);
+    // Create logger
     log = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
 }
 

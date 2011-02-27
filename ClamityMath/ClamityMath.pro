@@ -16,8 +16,12 @@ LIBS +=                         \
 
 HEADERS +=                      \
     ClamityMath.hh              \
+    ClamityMath.cl              \
 
 SOURCES +=                      \
     Arithmetic.cc               \
     Basic.cc                    \
     ClamityMath.cc              \
+
+RESOURCES +=                    \
+    ClamityMath.qrc             \

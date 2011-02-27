@@ -20,7 +20,7 @@
 void ClamityMath::testBasic(Clamity &subject) {
     Logger &log = subject.log;
     cl::Device &device = subject.device;
-    cl::Context context(subject.devices);
+    cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
     using boost::format;
@@ -35,7 +35,7 @@ void ClamityMath::testBasic(Clamity &subject) {
     log(LOG_INFO, "Basic sanity tests");
 
     cl::Program program;
-    subject.compile(program, "Basic.cl");
+    subject.compile(program, ClamityMathCL);
 
     log(LOG_INFO, "  Unsigned shift test");
 

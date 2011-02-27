@@ -17,28 +17,7 @@
 
 #include "Clamity.hh"
 
-#include <fstream>
-#include <sstream>
-
-std::string readFile(const char *path) {
-    char buffer[4096];
-
-    std::fstream in;
-    in.open(path);
-
-    std::ostringstream out;
-
-    while (true) {
-        std::streamsize count = in.readsome(buffer, sizeof(buffer));
-
-        if (count < 1)
-            break;
-
-        out.write(buffer, count);
-    }
-
-    return out.str();
-}
+#include <QFile>
 
 void Clamity::reportCompile(cl::Program &program) {
     std::string buildlog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
@@ -51,25 +30,30 @@ void Clamity::reportCompile(cl::Program &program) {
 }
 
 void Clamity::compile(cl::Program &program, const char *path) {
-    std::string source = readFile(path);
+    QFile file(path);
 
-    cl::Program::Sources sources(1, std::make_pair(source.c_str(), source.size()));
-    program = cl::Program(context, sources);
+    if (file.open(QFile::ReadOnly)) {
+        QByteArray code = file.readAll();
+        file.close();
 
-    try {
-        logfile << "Compiling '" << path << "', " << source.size() << " bytes" << std::endl;
-        program.build(devices, "");
+        cl::Program::Sources sources(1, std::make_pair(code.data(), code.size()));
+        program = cl::Program(context, sources);
 
-        // Save compile log even if successful,
-        // as it may have warnings
-        reportCompile(program);
-    } catch (cl::Error error) {
-        // Save compile log if there was a build exception
-        if (error.err() == CL_BUILD_PROGRAM_FAILURE)
+        try {
+            logfile << "Compiling '" << path << "', " << code.size() << " bytes" << std::endl;
+            program.build(devices, "");
+
+            // Save compile log even if successful,
+            // as it may have warnings
             reportCompile(program);
+        } catch (cl::Error error) {
+            // Save compile log if there was a build exception
+            if (error.err() == CL_BUILD_PROGRAM_FAILURE)
+                reportCompile(program);
 
-        // Re-throw the error anyway,
-        // so that the whole test fails
-        throw error;
+            // Re-throw the error anyway,
+            // so that the whole test fails
+            throw error;
+        }
     }
 }
