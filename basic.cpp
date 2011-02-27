@@ -30,13 +30,13 @@ void Clamity::testBasic() {
     static const cl_uint shiftSize = 7;
 
     logSystem(LOG_INFO, "Basic sanity tests");
-    
+
 
     cl::Program program;
     compile(program, "basic.cl");
 
     logSystem(LOG_INFO, "  Unsigned shift test");
-    
+
 
     cl::Kernel kern_shift(program, "testShiftCL");
 

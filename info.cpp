@@ -36,7 +36,7 @@ using namespace boost;
 using boost::format;
 
 void Clamity::logInfo() {
-    logSystem(LOG_INFO,"Platform"); 
+    logSystem(LOG_INFO,"Platform");
     logSystem(LOG_INFO,str(format("  Vendor  " + platform.getInfo<CL_PLATFORM_VENDOR>()  )));
     logSystem(LOG_INFO,str(format("  Name    " + platform.getInfo<CL_PLATFORM_NAME>()    )));
     logSystem(LOG_INFO,str(format("  Version " + platform.getInfo<CL_PLATFORM_VERSION>() )));
@@ -49,7 +49,7 @@ void Clamity::logInfo() {
     logSystem(LOG_INFO,str(format("  Version " + device.getInfo<CL_DEVICE_VERSION>() )));
     logSystem(LOG_INFO,str(format("  Type    " + device.getInfo<CL_DEVICE_TYPE>() )));
     logSystem(LOG_INFO,str(format("  Profile " + device.getInfo<CL_DEVICE_PROFILE>() )));
-    
+
 
     // TODO: Log more device info
 }

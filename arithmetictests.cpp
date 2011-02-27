@@ -30,15 +30,15 @@ inline bool isEqual(double x, double y)
   const double epsilon = 1e-5; /* some small number such as 1e-5 */;
   return std::abs(x - y) <= epsilon * std::abs(x);
   // see Knuth section 4.2.2 pages 217-218
-} 
- 
+}
 
- 
+
+
 bool CheckResults(cl_float * data, cl_float * wanted ,unsigned int vecCount, std::ostream  &logfile) {
-  
+
   for (size_t i = 0; i < vecCount; i++) {
         const cl_float have = data[i];
-        const cl_float want = wanted[i] ; 
+        const cl_float want = wanted[i] ;
         if (!isEqual(have, want)) {
            logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
                     << " (have gpu: " << have << ", want cpu:" << want << ")" << std::endl;
@@ -73,7 +73,7 @@ void Clamity::basicALU() {
        logfile << "CPU device detected skipping.... " << std::endl;
        return;
     }
-    
+
     if (maxAllocMultiple != 4)
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
@@ -89,19 +89,19 @@ void Clamity::basicALU() {
     cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-  
+
     for (size_t i = 0; i < vecCount; i++) {
         data[i]  =  rand() % UINT_MAX;
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
     }
-    
+
     cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
     logfile << "Executing test kernel " << std::endl;
-    
+
      try {
         queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
         queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
@@ -115,7 +115,7 @@ void Clamity::basicALU() {
 
         queue.finish();
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
-        
+
     } catch (cl::Error error) {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
@@ -125,17 +125,17 @@ void Clamity::basicALU() {
             free(results);
            return;
     }
-    
+
     logfile<<"  Test Passed"<<std::endl;
-    
-    
+
+
     free(data);
     free(dataA);
     free(dataB);
     free(results);
 }
 
- 
+
 
 void Clamity::basicFMAD() {
     static const size_t groupSize = 256;
@@ -173,22 +173,22 @@ void Clamity::basicFMAD() {
     cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-  
+
     logfile <<"Creating results table"<<std::endl;
-    
+
      for (size_t i = 0; i < vecCount; i++) {
         data[i]  =  rand() % UINT_MAX;
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
         results[i] =  data[i] + ( dataA[i] * dataB[i]);   //Verify against the CPU results
     }
-    
+
     cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
     logfile << "Executing test kernel " << std::endl;
-    
+
      try {
         queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
         queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
@@ -215,8 +215,8 @@ void Clamity::basicFMAD() {
        logfile<<"  Test Failed!"<<std::endl;
     else
        logfile<<"  Test Passed"<<std::endl;
-    
-    
+
+
     free(data);
     free(dataA);
     free(dataB);
@@ -301,16 +301,16 @@ void Clamity::basicADD() {
     cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
     cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    
+
     logfile <<"Testing Random ADD operation " << std::endl;
-    
-    
+
+
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
         results[i] = dataA[i] + dataB[i];   //Verify against the CPU results
     }
-    
+
      try {
         queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
         queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
@@ -335,8 +335,8 @@ void Clamity::basicADD() {
        logfile<<"  Test Failed!"<<std::endl;
     else
        logfile<<"  Test Passed"<<std::endl;
-    
-    
+
+
     free(data);
     free(dataA);
     free(dataB);
@@ -408,7 +408,7 @@ void Clamity::basicMULT() {
            free(results);
            return;
     }
-    
+
     bool good = true;
     for (size_t i = 0; i < vecCount; i++) {
        const cl_float have = data[i];
@@ -421,19 +421,19 @@ void Clamity::basicMULT() {
            return;
        }
     }
-    
+
     //Random Mult
-    
+
     logfile <<"Testing Random MULT operation " << std::endl;
-    
-    
+
+
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
         results[i] = dataA[i] * dataB[i];   //Verify against the CPU results
     }
 
-    
+
      try {
         queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
         queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
@@ -454,13 +454,13 @@ void Clamity::basicMULT() {
            free(results);
            return;
     }
-    
+
     if(!CheckResults(data,results,vecCount,logfile))
        logfile<<"  Test Failed!"<<std::endl;
     else
        logfile<<"  Test Passed"<<std::endl;
-    
-    
+
+
     free(data);
     free(dataA);
     free(dataB);

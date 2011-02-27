@@ -105,13 +105,13 @@ int main(int argc, char **argv) {
               cl::Device device = devices.at(ndevice);
 
 #ifdef CLAMITY_DEBUG
-            
+
               // Invoke tests in order, log to stdout
              Clamity test(std::cout, device);
              test.testDevice();
                continue;
-            
-           
+
+
 #endif
 
             // Fork a child process to test this device
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
             }
           }
         }
-       
+
     }
     catch (cl::Error error) {
          std::cout << "Test Failed --- ";
