@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLAMITY_LOGGER_H
-#define CLAMITY_LOGGER_H
+#ifndef CLAMITY_LOGGER_HH
+#define CLAMITY_LOGGER_HH
 
 #include "Common.hh"
 
@@ -53,4 +53,4 @@ typedef boost::function<
 Logger makeSimpleLogger(LogLevel threshold, std::string const & prefix);
 Logger makeStreamLogger(LogLevel threshold, std::string const & prefix, std::ostream * stream);
 
-#endif // CLAMITY_LOGGER_H
+#endif // CLAMITY_LOGGER_HH

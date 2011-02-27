@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLAMITY_COMMON_H
-#define CLAMITY_COMMON_H
+#ifndef CLAMITY_COMMON_HH
+#define CLAMITY_COMMON_HH
 
 // Use standard Boost headers
 #include <boost/cstdint.hpp>
@@ -31,4 +31,4 @@
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
-#endif // CLAMITY_COMMON_H
+#endif // CLAMITY_COMMON_HH

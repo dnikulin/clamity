@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLAMITY_H
-#define CLAMITY_H
+#ifndef CLAMITY_HH
+#define CLAMITY_HH
 
 #include "Logger.hh"
 
@@ -61,4 +61,4 @@ public:
 // tools.cpp
 std::string readFile(const char *path);
 
-#endif // CLAMITY_H
+#endif // CLAMITY_HH
