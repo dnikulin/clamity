@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "clamity.h"
+#include "Clamity.hh"
 
 #include <stdint.h>
 #include <stdio.h>

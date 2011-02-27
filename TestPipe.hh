@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <map>
-#include "TestTemplate.h"  //empty template class that needs to be extended later on for plugins etc.
+#include "TestTemplate.hh"  //empty template class that needs to be extended later on for plugins etc.
 using namespace std;
 
 enum CLAMITY_TEST_PRIORITY {CLAMITY_TEST_HIGH, CLAMITY_TEST_MEDIUM, CLAMITY_TEST_LOW};

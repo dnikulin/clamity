@@ -30,7 +30,7 @@
 
 #define MEMORY_FRACTION 1
 
-#include "logger.h"
+#include "Logger.hh"
 
 // Structure to bind together common objects during testing
 struct Clamity {

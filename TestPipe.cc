@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "testpipe.h"
+#include "TestPipe.hh"
 
 TestPipe::TestPipe() {
     testPipeLine.clear();
