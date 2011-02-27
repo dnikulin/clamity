@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin, Enzo Reyes.
+// Copyright 2010-2011 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -33,7 +33,6 @@ using boost::format;
 
 Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     : logfile(_logfile), device(_device) {
-
 
     // Retrieve platform from device
     platform = device.getInfo<CL_DEVICE_PLATFORM>();
@@ -92,60 +91,58 @@ int main(int argc, char **argv) {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
-
     try {
-      for (size_t nplatform = 0; nplatform < platforms.size(); nplatform++) {
+        for (size_t nplatform = 0; nplatform < platforms.size(); nplatform++) {
             cl::Platform platform = platforms.at(nplatform);
 
-          // Discover all OpenCL devices of any type
-          std::vector<cl::Device> devices;
-          platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+            // Discover all OpenCL devices of any type
+            std::vector<cl::Device> devices;
+            platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
-          for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
-              cl::Device device = devices.at(ndevice);
+            for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
+                cl::Device device = devices.at(ndevice);
 
 #ifdef CLAMITY_DEBUG
 
-              // Invoke tests in order, log to stdout
-             Clamity test(std::cout, device);
-             test.testDevice();
-               continue;
+                // Invoke tests in order, log to stdout
+                Clamity test(std::cout, device);
+                test.testDevice();
+                continue;
 
 
 #endif
 
-            // Fork a child process to test this device
-            const pid_t pid = ::fork();
+                // Fork a child process to test this device
+                const pid_t pid = ::fork();
 
-            std::string logname = logFileName(nplatform, ndevice, device);
+                std::string logname = logFileName(nplatform, ndevice, device);
 
-            if (pid == 0) { // child process
-                // Allows the OpenCL implementation to
-                // release platform and device resources
-                platforms.clear();
-                devices.clear();
+                if (pid == 0) { // child process
+                    // Allows the OpenCL implementation to
+                    // release platform and device resources
+                    platforms.clear();
+                    devices.clear();
 
-                // Open log file
-                std::ofstream logfile;
-                logfile.open(logname.c_str());
+                    // Open log file
+                    std::ofstream logfile;
+                    logfile.open(logname.c_str());
 
-                // Invoke tests
-                Clamity test(logfile, device);
-                test.testDevice();
+                    // Invoke tests
+                    Clamity test(logfile, device);
+                    test.testDevice();
 
-                // Flush explicitly, in case an exception must be traced
-                logfile.flush();
-                logfile.close();
-                return 0;
-            } else { // parent process
-                nchildren++;
-                std::cerr << "PID " << pid << " will write to " << logname << std::endl;
+                    // Flush explicitly, in case an exception must be traced
+                    logfile.flush();
+                    logfile.close();
+                    return 0;
+                } else { // parent process
+                    nchildren++;
+                    std::cerr << "PID " << pid
+                            << " will write to " << logname << std::endl;
+                }
             }
-          }
         }
-
-    }
-    catch (cl::Error error) {
+    } catch (cl::Error error) {
          std::cout << "Test Failed --- ";
          std::cout << error.what() << "(" << error.err() << ")" << std::endl;
     }

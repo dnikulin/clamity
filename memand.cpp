@@ -35,9 +35,7 @@ void Clamity::memBasicAnd() {
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
 
-
     unsigned long memorySize = vecCount * sizeof(cl_uint);
-
 
     logfile << "Random AND memory test" << std::endl;
     logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
@@ -82,9 +80,9 @@ void Clamity::memBasicAnd() {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-           logfile << "Test Failed --- ";
-           logfile << error.what() << "(" << error.err() << ")" << std::endl;
-           return;
+        logfile << "Test Failed --- ";
+        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        return;
     }
 
     bool good = true;
@@ -108,7 +106,7 @@ void Clamity::memBasicAnd() {
     // Zero one of them, the resultant AND should be zero
     // To further test the buffers will be swapped and tested for Zero values
 
-    for(size_t i = 0; i < vecCount; i++) {
+    for (size_t i = 0; i < vecCount; i++) {
         randomVal = rand() % UINT_MAX;
         data.at(i) = randomVal;
         invertedData.at(i) = 0;
@@ -126,9 +124,9 @@ void Clamity::memBasicAnd() {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-           logfile << "Test Failed --- ";
-           logfile << error.what() << "(" << error.err() << ")" << std::endl;
-           return;
+        logfile << "Test Failed --- ";
+        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        return;
     }
 
     for (size_t i = 0; i < vecCount; i++) {
@@ -147,7 +145,7 @@ void Clamity::memBasicAnd() {
         logfile <<"    Passed Random Zero AND part 1" << std::endl;
 
 
-    for(size_t i = 0; i < vecCount; i++) {
+    for (size_t i = 0; i < vecCount; i++) {
         randomVal = rand() % UINT_MAX;
         data.at(i) = 0;
         invertedData.at(i) = randomVal;
@@ -165,9 +163,9 @@ void Clamity::memBasicAnd() {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-           logfile << "Test Failed --- ";
-           logfile << error.what() << "(" << error.err() << ")" << std::endl;
-           return;
+        logfile << "Test Failed --- ";
+        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        return;
     }
 
     for (size_t i = 0; i < vecCount; i++) {
@@ -183,6 +181,5 @@ void Clamity::memBasicAnd() {
     }
 
     if (good == true)
-        logfile <<"    Passed Random Zero AND part 2" << std::endl;
-
+        logfile << "    Passed Random Zero AND part 2" << std::endl;
 }

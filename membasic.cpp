@@ -24,7 +24,6 @@ void Clamity::memBasic() {
     unsigned int currShift = 0;  // How many times we have shifted already
     unsigned int shiftedVal = 1;
 
-
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
 
@@ -34,9 +33,7 @@ void Clamity::memBasic() {
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
 
-
     unsigned long memorySize = vecCount * sizeof(cl_uint);
-
 
     logfile << "Basic memory tests" << std::endl;
     logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
@@ -73,9 +70,9 @@ void Clamity::memBasic() {
 
             queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
         } catch (cl::Error error) {
-               logfile << "Test Failed --- ";
-               logfile << error.what() << "(" << error.err() << ")" << std::endl;
-               return;
+            logfile << "Test Failed --- ";
+            logfile << error.what() << "(" << error.err() << ")" << std::endl;
+            return;
         }
 
         bool good = true;
@@ -101,6 +98,5 @@ void Clamity::memBasic() {
             data.at(i) = shiftedVal << currShift;
 
         shiftedVal <<= currShift;
-
     } while (currShift < maxShift);
 }
