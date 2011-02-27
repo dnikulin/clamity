@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010-2011 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -18,19 +18,9 @@
 #ifndef CLAMITY_H
 #define CLAMITY_H
 
-// Use official OpenCL C++ wrapper in exception mode
-// Failed API calls will abort with cl::Error
-#define __CL_ENABLE_EXCEPTIONS
-#include <CL/cl.hpp>
-
-#include <iomanip>
-#include <ostream>
-#include <string>
-#include <vector>
+#include "Logger.hh"
 
 #define MEMORY_FRACTION 1
-
-#include "Logger.hh"
 
 // Structure to bind together common objects during testing
 struct Clamity {

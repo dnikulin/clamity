@@ -4,6 +4,7 @@ CONFIG  += thread warn_on release
 
 HEADERS +=                      \
     Clamity.hh                  \
+    Common.hh                   \
     Logger.hh                   \
 
 SOURCES +=                      \

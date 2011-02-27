@@ -18,8 +18,9 @@
 #ifndef CLAMITY_LOGGER_H
 #define CLAMITY_LOGGER_H
 
+#include "Common.hh"
+
 #include <ostream>
-#include <string>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>

@@ -17,6 +17,8 @@
 
 #include "Clamity.hh"
 
+#include <iomanip>
+
 void Clamity::testAlloc() {
     logfile << "Memory allocation" << std::endl;
 
