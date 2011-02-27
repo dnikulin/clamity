@@ -23,7 +23,9 @@
 #define MEMORY_FRACTION 1
 
 // Structure to bind together common objects during testing
-struct Clamity {
+class Clamity : public boost::noncopyable {
+public:
+
     std::ostream               &logfile;
     Logger                      log;
 
