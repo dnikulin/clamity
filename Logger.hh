@@ -24,21 +24,24 @@
 #include <boost/function.hpp>
 
 enum LogLevel {
-    LOG_DEBUG = 0,
-    LOG_INFO  = 1,
-    LOG_WARN  = 2,
-    LOG_ERROR = 3,
-    LOG_CRITICAl = 4,
-    LOG_ALERT = 5,
-    LOG_PANIC = 6
+    LOG_DEBUG       = 0,
+    LOG_INFO        = 1,
+    LOG_WARN        = 2,
+    LOG_ERROR       = 3,
+    LOG_CRITICAL    = 4,
+    LOG_ALERT       = 5,
+    LOG_PANIC       = 6
 };
 
-static const std::string LOG_PREFIX[7] =
-{
-    "DEBUG","INFO","WARN","ERROR","CRITICAL",
-    "ALERT","PANIC"
+static const char * const LOG_PREFIX[] = {
+    "DEBUG",
+    "INFO",
+    "WARN",
+    "ERROR",
+    "CRITICAL",
+    "ALERT",
+    "PANIC"
 };
-
 
 typedef boost::function<
     void (LogLevel /* level */, std::string const & /* line */)
