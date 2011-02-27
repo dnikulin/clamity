@@ -35,7 +35,7 @@
 // Structure to bind together common objects during testing
 struct Clamity {
     std::ostream               &logfile;
-    Logger                      logSystem;
+    Logger                      log;
 
     cl::Platform                platform;
     cl::Device                  device;

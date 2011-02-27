@@ -25,7 +25,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <QtCore/QDebug>
 #include <boost/function.hpp>
 #include <boost/format.hpp>
 
@@ -44,13 +43,13 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
 
     // Create command queue
     queue = cl::CommandQueue(context, device);
-    logSystem = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
+    log = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
 }
 
 void Clamity::testDevice() {
     std::string name = device.getInfo<CL_DEVICE_NAME>();
 
-    logSystem(LOG_INFO,str(format("Clamity test started for %s ") % name));
+    log(LOG_INFO,str(format("Clamity test started for %s ") % name));
     // logfile << "clamity test started for " << name << std::endl;
     //logfile << std::endl;
 

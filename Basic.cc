@@ -17,7 +17,6 @@
 
 #include "Clamity.hh"
 
-#include <boost/function.hpp>
 #include <boost/format.hpp>
 
 using boost::format;
@@ -30,12 +29,12 @@ void Clamity::testBasic() {
     static const cl_uint modulo = 1337;
     static const cl_uint shiftSize = 7;
 
-    logSystem(LOG_INFO, "Basic sanity tests");
+    log(LOG_INFO, "Basic sanity tests");
 
     cl::Program program;
     compile(program, "Basic.cl");
 
-    logSystem(LOG_INFO, "  Unsigned shift test");
+    log(LOG_INFO, "  Unsigned shift test");
 
     cl::Kernel kern_shift(program, "testShiftCL");
 
@@ -61,10 +60,10 @@ void Clamity::testBasic() {
 
         if (have != want) {
             good = false;
-            logSystem(LOG_ERROR,str(format("    Incorrect at offset %d (have: %d want: %d) ")%i %have %want));
+            log(LOG_ERROR,str(format("    Incorrect at offset %d (have: %d want: %d) ")%i %have %want));
         }
     }
 
     if (good == true)
-        logSystem(LOG_INFO,"    Passed");
+        log(LOG_INFO,"    Passed");
 }

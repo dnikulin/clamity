@@ -24,20 +24,20 @@ void Clamity::logInfo() {
     using boost::format;
     using boost::str;
 
-    logSystem(LOG_INFO, "Platform");
-    logSystem(LOG_INFO, str(format("  Vendor     %s") % platform.getInfo<CL_PLATFORM_VENDOR>()));
-    logSystem(LOG_INFO, str(format("  Name       %s") % platform.getInfo<CL_PLATFORM_NAME>()));
-    logSystem(LOG_INFO, str(format("  Version    %s") % platform.getInfo<CL_PLATFORM_VERSION>()));
-    logSystem(LOG_INFO, str(format("  Profile    %s") % platform.getInfo<CL_PLATFORM_PROFILE>()));
-    logSystem(LOG_INFO, "");
+    log(LOG_INFO, "Platform");
+    log(LOG_INFO, str(format("  Vendor     %s") % platform.getInfo<CL_PLATFORM_VENDOR>()));
+    log(LOG_INFO, str(format("  Name       %s") % platform.getInfo<CL_PLATFORM_NAME>()));
+    log(LOG_INFO, str(format("  Version    %s") % platform.getInfo<CL_PLATFORM_VERSION>()));
+    log(LOG_INFO, str(format("  Profile    %s") % platform.getInfo<CL_PLATFORM_PROFILE>()));
+    log(LOG_INFO, "");
 
-    logSystem(LOG_INFO, "Device");
-    logSystem(LOG_INFO, str(format("  Vendor     %s") % device.getInfo<CL_DEVICE_VENDOR>()));
-    logSystem(LOG_INFO, str(format("  Name       %s") % device.getInfo<CL_DEVICE_NAME>()));
-    logSystem(LOG_INFO, str(format("  Version    %s") % device.getInfo<CL_DEVICE_VERSION>()));
-    logSystem(LOG_INFO, str(format("  Type       %d") % device.getInfo<CL_DEVICE_TYPE>()));
-    logSystem(LOG_INFO, str(format("  Profile    %s") % device.getInfo<CL_DEVICE_PROFILE>()));
-    logSystem(LOG_INFO, "");
+    log(LOG_INFO, "Device");
+    log(LOG_INFO, str(format("  Vendor     %s") % device.getInfo<CL_DEVICE_VENDOR>()));
+    log(LOG_INFO, str(format("  Name       %s") % device.getInfo<CL_DEVICE_NAME>()));
+    log(LOG_INFO, str(format("  Version    %s") % device.getInfo<CL_DEVICE_VERSION>()));
+    log(LOG_INFO, str(format("  Type       %d") % device.getInfo<CL_DEVICE_TYPE>()));
+    log(LOG_INFO, str(format("  Profile    %s") % device.getInfo<CL_DEVICE_PROFILE>()));
+    log(LOG_INFO, "");
 
     // TODO: Log more device info
 }
