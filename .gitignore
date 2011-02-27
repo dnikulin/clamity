@@ -1,5 +1,6 @@
 *.o
-/[cC]lamity
 /[cC]lamity.pro.user
 [cC]lamity*txt
-/Makefile
+Makefile
+/Release/
+
