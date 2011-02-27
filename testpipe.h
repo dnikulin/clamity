@@ -16,7 +16,7 @@ private:
     vector <TestTemplate *> highPriorityQueue;
     vector <TestTemplate *> mediumPriorityQueue;
     vector <TestTemplate *> lowPriorityQueue;
-	map <char *, TestTemplate *> namedTests;
+        map <char *, TestTemplate *> namedTests;
 
 public:
     TestPipe();

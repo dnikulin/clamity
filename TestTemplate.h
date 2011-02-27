@@ -4,7 +4,7 @@
 class TestTemplate
 {
 public:
-	virtual bool RunTest(){return true;};
+        virtual bool RunTest(){return true;};
 };
 
 

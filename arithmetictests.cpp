@@ -113,16 +113,16 @@ void Clamity::basicALU() {
 
         queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
 
-	queue.finish();
+        queue.finish();
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
-	
+        
     } catch (cl::Error error) {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
            free(data);
-	    free(dataA);
-	    free(dataB);
-	    free(results);
+            free(dataA);
+            free(dataB);
+            free(results);
            return;
     }
     
@@ -180,7 +180,7 @@ void Clamity::basicFMAD() {
         data[i]  =  rand() % UINT_MAX;
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
-	results[i] =  data[i] + ( dataA[i] * dataB[i]);   //Verify against the CPU results
+        results[i] =  data[i] + ( dataA[i] * dataB[i]);   //Verify against the CPU results
     }
     
     cl::Buffer memoryA(context, CL_MEM_READ_ONLY, memorySize);
@@ -205,9 +205,9 @@ void Clamity::basicFMAD() {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
            free(data);
-	    free(dataA);
-	    free(dataB);
-	    free(results);
+            free(dataA);
+            free(dataB);
+            free(results);
            return;
     }
     logfile << "Verifying results" << std::endl;
@@ -308,7 +308,7 @@ void Clamity::basicADD() {
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
-	results[i] = dataA[i] + dataB[i];   //Verify against the CPU results
+        results[i] = dataA[i] + dataB[i];   //Verify against the CPU results
     }
     
      try {
@@ -326,9 +326,9 @@ void Clamity::basicADD() {
            logfile << "Test Failed --- ";
            logfile << error.what() << "(" << error.err() << ")" << std::endl;
            free(data);
-	   free(dataA);
-	   free(dataB);
-	   free(results);
+           free(dataA);
+           free(dataB);
+           free(results);
            return;
     }
     if(!CheckResults(data,results,vecCount,logfile))
@@ -405,7 +405,7 @@ void Clamity::basicMULT() {
            free(data);
            free(dataA);
            free(dataB);
-	   free(results);
+           free(results);
            return;
     }
     
@@ -430,7 +430,7 @@ void Clamity::basicMULT() {
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % ( UINT_MAX /2 ) ;
         dataB[i] =  rand() % ( UINT_MAX /2 ) ;
-	results[i] = dataA[i] * dataB[i];   //Verify against the CPU results
+        results[i] = dataA[i] * dataB[i];   //Verify against the CPU results
     }
 
     
@@ -451,7 +451,7 @@ void Clamity::basicMULT() {
            free(data);
            free(dataA);
            free(dataB);
-	   free(results);
+           free(results);
            return;
     }
     
