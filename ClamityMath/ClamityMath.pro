@@ -1,7 +1,6 @@
 TEMPLATE = lib
-QT += core
+CONFIG += plugin
 QT -= gui
-CONFIG  += thread warn_on release plugin
 
 DESTDIR = ../Release/Plugins/
 
@@ -15,6 +14,10 @@ LIBS +=                         \
     -L../Release/               \
     -lClamityCore               \
 
+HEADERS +=                      \
+    ClamityMath.hh              \
+
 SOURCES +=                      \
     Arithmetic.cc               \
     Basic.cc                    \
+    ClamityMath.cc              \

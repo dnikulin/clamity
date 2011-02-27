@@ -46,7 +46,6 @@ static const size_t TestLevelCount =
 class TestSuite : public boost::noncopyable {
 public:
 
-    TestSuite() {}
     virtual ~TestSuite() {}
 
     virtual std::string suiteName() const = 0;

@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010-2011 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -15,9 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "ClamityMath.hh"
 
-void Clamity::testBasic() {
+void ClamityMath::testBasic(Clamity &subject) {
+    Logger &log = subject.log;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     using boost::format;
     using boost::str;
 
@@ -30,7 +35,7 @@ void Clamity::testBasic() {
     log(LOG_INFO, "Basic sanity tests");
 
     cl::Program program;
-    compile(program, "Basic.cl");
+    subject.compile(program, "Basic.cl");
 
     log(LOG_INFO, "  Unsigned shift test");
 
@@ -58,7 +63,7 @@ void Clamity::testBasic() {
 
         if (have != want) {
             good = false;
-            log(LOG_ERROR,str(format("    Incorrect at offset %d (have: %d want: %d) ")%i %have %want));
+            log(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ") % i % have % want));
         }
     }
 

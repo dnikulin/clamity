@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin, Enzo Reyes.
+// Copyright 2010-2011 Dmitri Nikulin, Enzo Reyes.
 //
 // This file is part of clamity.
 //
@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "ClamityMath.hh"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -26,14 +26,14 @@
 
 #include <cmath>  /* for std::abs(double) */
 
-inline bool isEqual(double x, double y)
+static bool isEqual(double x, double y)
 {
     const double epsilon = 1e-5; /* some small number such as 1e-5 */;
     return std::abs(x - y) <= epsilon * std::abs(x);
     // see Knuth section 4.2.2 pages 217-218
 }
 
-bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCount, std::ostream  &logfile) {
+static bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCount, std::ostream  &logfile) {
     for (size_t i = 0; i < vecCount; i++) {
         const cl_float have = data[i];
         const cl_float want = wanted[i];
@@ -46,7 +46,12 @@ bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCount, std
     return true;
 }
 
-void Clamity::basicALU() {
+void ClamityMath::basicALU(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -62,7 +67,7 @@ void Clamity::basicALU() {
 
     logfile << "Basic ALU tests" << std::endl;
     logfile << "Testing for A = A + (B * C) - Executing over 65535 iterations" <<std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
 
     if (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU) {
@@ -74,7 +79,7 @@ void Clamity::basicALU() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "BasicSum.cl");
+    subject.compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -129,7 +134,12 @@ void Clamity::basicALU() {
     free(results);
 }
 
-void Clamity::basicFMAD() {
+void ClamityMath::basicFMAD(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -145,14 +155,14 @@ void Clamity::basicFMAD() {
 
     logfile << "Basic ALU tests" << std::endl;
     logfile << "Testing for A = A + (B * C)" <<std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
 
     if (maxAllocMultiple != 4)
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "BasicSum.cl");
+    subject.compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -213,7 +223,12 @@ void Clamity::basicFMAD() {
     free(results);
 }
 
-void Clamity::basicADD() {
+void ClamityMath::basicADD(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -229,14 +244,14 @@ void Clamity::basicADD() {
 
     logfile << "Basic ALU tests" << std::endl;
     logfile << "Testing for A = B + C" <<std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
 
     if (maxAllocMultiple != 4)
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "BasicSum.cl");
+    subject.compile(program, "BasicSum.cl");
 
     logfile.flush();
 
@@ -328,7 +343,12 @@ void Clamity::basicADD() {
     free(results);
 }
 
-void Clamity::basicMULT() {
+void ClamityMath::basicMULT(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -344,14 +364,14 @@ void Clamity::basicMULT() {
 
     logfile << "Basic ALU tests" << std::endl;
     logfile << "Testing for A = B * C" <<std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
+    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
     logfile << std::endl;
 
     if (maxAllocMultiple != 4)
         logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "BasicSum.cl");
+    subject.compile(program, "BasicSum.cl");
 
     logfile.flush();
 

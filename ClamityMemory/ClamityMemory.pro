@@ -1,7 +1,6 @@
 TEMPLATE = lib
-QT += core
+CONFIG  += plugin
 QT -= gui
-CONFIG  += thread warn_on release plugin
 
 DESTDIR = ../Release/Plugins/
 
@@ -15,7 +14,11 @@ LIBS +=                         \
     -L../Release/               \
     -lClamityCore               \
 
+HEADERS +=                      \
+    ClamityMemory.hh            \
+
 SOURCES +=                      \
     Alloc.cc                    \
+    ClamityMemory.cc            \
     MemAnd.cc                   \
     MemBasic.cc                 \

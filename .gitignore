@@ -3,4 +3,5 @@
 [cC]lamity*txt
 Makefile
 /Release/
+moc_*.cpp
 

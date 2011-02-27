@@ -15,11 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "ClamityMemory.hh"
 
 #include <iomanip>
 
-void Clamity::testAlloc() {
+void ClamityMemory::testAlloc(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     logfile << "Memory allocation" << std::endl;
 
     size_t size = 8;

@@ -35,29 +35,18 @@ public:
     cl::Context                 context;
     cl::CommandQueue            queue;
 
-    // main.cpp
+    // Main.cc
     Clamity(std::ostream &logfile, cl::Device &device);
 
-    // info.cpp
+    // Info.cc
     void logInfo();
 
-    // alloc.cpp
-    void testAlloc();
-
-    // basic.cpp
-    void testBasic();
-    void memBasic();
-    void memBasicAnd();
-    void basicADD();
-    void basicMULT();
-    void basicFMAD();
-    void basicALU();
-    // tools.cpp
+    // Tools.cc
     void reportCompile(cl::Program &program);
     void compile(cl::Program &program, const char *path);
 };
 
-// tools.cpp
+// Tools.cc
 std::string readFile(const char *path);
 
 #endif // CLAMITY_HH

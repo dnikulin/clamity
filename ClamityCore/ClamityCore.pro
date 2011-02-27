@@ -1,7 +1,6 @@
 TEMPLATE = lib
-QT += core
 QT -= gui
-CONFIG  += thread warn_on release
+
 DEFINES += CLAMITY_CORE_LIBRARY
 
 DESTDIR = ../Release/

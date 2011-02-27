@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "ClamityMemory.hh"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -23,7 +23,12 @@
 #include <stdlib.h>
 #include <limits.h>
 
-void Clamity::memBasicAnd() {
+void ClamityMemory::memBasicAnd(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -45,7 +50,7 @@ void Clamity::memBasicAnd() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "MemBasic.cl");
+    subject.compile(program, "MemBasic.cl");
 
     logfile.flush();
 

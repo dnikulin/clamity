@@ -15,9 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "ClamityMemory.hh"
 
-void Clamity::memBasic() {
+void ClamityMemory::memBasic(Clamity &subject) {
+    std::ostream &logfile = subject.logfile;
+    cl::Device &device = subject.device;
+    cl::Context context(subject.devices);
+    cl::CommandQueue queue(context, device);
+
     static const size_t groupSize = 256;
     static const unsigned int maxShift = 32;  // We can only shift up to 31 places
 
@@ -43,7 +48,7 @@ void Clamity::memBasic() {
        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
 
     cl::Program program;
-    compile(program, "MemBasic.cl");
+    subject.compile(program, "MemBasic.cl");
 
     logfile.flush();
 

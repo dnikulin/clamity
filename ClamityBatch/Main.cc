@@ -17,6 +17,9 @@
 
 #include "TestSuite.hh"
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
 #include <QPluginLoader>
 
 #include <fstream>
@@ -53,18 +56,6 @@ static void testDevice(Clamity &subject, TestSuites &suites) {
     // In case of a bug report, this is critical
     subject.logInfo();
 
-    // Run the most basic tests first
-    subject.testAlloc();
-    subject.testBasic();
-    subject.memBasic();
-    subject.memBasicAnd();
-    subject.basicADD();
-    subject.basicMULT();
-    subject.basicFMAD();
-    subject.basicALU();
-    // Flush log now, in case of an exception or crash after
-    subject.logfile.flush();
-
     // Run suites once per level, in decreasing order of importance.
     for (size_t nlevel = 0; nlevel < TestLevelCount; nlevel++) {
         const TestLevelData &level = TestLevels[nlevel];
@@ -80,20 +71,62 @@ static void testDevice(Clamity &subject, TestSuites &suites) {
     log(LOG_INFO, "Clamity testing complete");
 }
 
-static void loadStaticSuites(TestSuites *suites) {
-    foreach (QObject *object, QPluginLoader::staticInstances()) {
-       TestSuite *suite = qobject_cast<TestSuite *>(object);
-       if (suite != NULL)
-           suites->push_back(suite);
+static void loadSuite(TestSuites *suites, QObject *object, const QString &path) {
+    TestSuite *suite = qobject_cast<TestSuite *>(object);
+    if (suite != NULL) {
+        suites->push_back(suite);
+
+        std::cerr
+            << "Loaded suite '" << suite->suiteName()
+            << "' from '" << path.toStdString()
+            << "'" << std::endl << std::flush;
     }
 }
 
+static void loadDynamicSuites(TestSuites *suites) {
+    // Start from binary directory
+    QDir root(qApp->applicationDirPath());
+
+    // Move down to Plugins directory
+    root.cd("Plugins");
+
+    foreach (QString name, root.entryList(QDir::Files)) {
+        QString path(root.absoluteFilePath(name));
+
+        std::cerr
+            << "Loading '" << path.toStdString()
+            << "'" << std::endl << std::flush;
+
+        QPluginLoader loader(path);
+
+        if (loader.load() == false) {
+            std::cerr
+                << "  " << loader.errorString().toStdString()
+                << std::endl << std::flush;
+            continue;
+        }
+
+        QObject *object = loader.instance();
+        if (object != NULL)
+            loadSuite(suites, object, path);
+    }
+}
+
+static void loadStaticSuites(TestSuites *suites) {
+    foreach (QObject *object, QPluginLoader::staticInstances())
+        loadSuite(suites, object, "static plugin");
+}
+
 int main(int argc, char **argv) {
+    QCoreApplication app(argc, argv);
+    Q_UNUSED(app);
+
     // Vector of all test suites found via plugins.
     TestSuites suites;
 
-    // Load static test suite plugins.
+    // Load static and dynamic test suite plugins.
     loadStaticSuites(&suites);
+    loadDynamicSuites(&suites);
 
     // Discover all OpenCL platforms
     // In general, each platform belongs to a specific vendor
