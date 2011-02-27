@@ -17,39 +17,27 @@
 
 #include "Clamity.hh"
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include <boost/algorithm/string.hpp>
-using namespace std;
-using namespace boost;
-
-
-#include <boost/function.hpp>
 #include <boost/format.hpp>
 
-using boost::format;
-
 void Clamity::logInfo() {
-    logSystem(LOG_INFO,"Platform");
-    logSystem(LOG_INFO,str(format("  Vendor  " + platform.getInfo<CL_PLATFORM_VENDOR>()  )));
-    logSystem(LOG_INFO,str(format("  Name    " + platform.getInfo<CL_PLATFORM_NAME>()    )));
-    logSystem(LOG_INFO,str(format("  Version " + platform.getInfo<CL_PLATFORM_VERSION>() )));
-    logSystem(LOG_INFO,str(format("  Profile " + platform.getInfo<CL_PLATFORM_PROFILE>() )));
-    logSystem(LOG_INFO,"");
+    using boost::format;
+    using boost::str;
 
-    logSystem(LOG_INFO,"Device");
-    logSystem(LOG_INFO,str(format("  Vendor  " + device.getInfo<CL_DEVICE_VENDOR>() )));
-    logSystem(LOG_INFO,str(format("  Name    " + device.getInfo<CL_DEVICE_NAME>()   )));
-    logSystem(LOG_INFO,str(format("  Version " + device.getInfo<CL_DEVICE_VERSION>() )));
-    logSystem(LOG_INFO,str(format("  Type    " + device.getInfo<CL_DEVICE_TYPE>() )));
-    logSystem(LOG_INFO,str(format("  Profile " + device.getInfo<CL_DEVICE_PROFILE>() )));
+    logSystem(LOG_INFO, "Platform");
+    logSystem(LOG_INFO, str(format("  Vendor     %s") % platform.getInfo<CL_PLATFORM_VENDOR>()));
+    logSystem(LOG_INFO, str(format("  Name       %s") % platform.getInfo<CL_PLATFORM_NAME>()));
+    logSystem(LOG_INFO, str(format("  Version    %s") % platform.getInfo<CL_PLATFORM_VERSION>()));
+    logSystem(LOG_INFO, str(format("  Profile    %s") % platform.getInfo<CL_PLATFORM_PROFILE>()));
+    logSystem(LOG_INFO, "");
 
+    logSystem(LOG_INFO, "Device");
+    logSystem(LOG_INFO, str(format("  Vendor     %s") % device.getInfo<CL_DEVICE_VENDOR>()));
+    logSystem(LOG_INFO, str(format("  Name       %s") % device.getInfo<CL_DEVICE_NAME>()));
+    logSystem(LOG_INFO, str(format("  Version    %s") % device.getInfo<CL_DEVICE_VERSION>()));
+    logSystem(LOG_INFO, str(format("  Type       %d") % device.getInfo<CL_DEVICE_TYPE>()));
+    logSystem(LOG_INFO, str(format("  Profile    %s") % device.getInfo<CL_DEVICE_PROFILE>()));
+    logSystem(LOG_INFO, "");
 
     // TODO: Log more device info
 }
