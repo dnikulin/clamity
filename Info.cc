@@ -17,9 +17,6 @@
 
 #include "Clamity.hh"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 void Clamity::logInfo() {
     using boost::format;
     using boost::str;

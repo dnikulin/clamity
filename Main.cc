@@ -25,11 +25,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/function.hpp>
-#include <boost/format.hpp>
-
-using boost::format;
-
 Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     : logfile(_logfile), device(_device) {
 
@@ -47,6 +42,9 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
 }
 
 void Clamity::testDevice() {
+    using boost::format;
+    using boost::str;
+
     std::string name = device.getInfo<CL_DEVICE_NAME>();
 
     log(LOG_INFO,str(format("Clamity test started for %s ") % name));

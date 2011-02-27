@@ -17,12 +17,10 @@
 
 #include "Clamity.hh"
 
-#include <boost/format.hpp>
-
-using boost::format;
-using namespace boost;
-
 void Clamity::testBasic() {
+    using boost::format;
+    using boost::str;
+
     static const size_t vecCount = 8192;
     static const size_t vecSize = vecCount * sizeof(cl_uint);
     static const size_t groupSize = 256;
