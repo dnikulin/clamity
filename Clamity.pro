@@ -1,11 +1,13 @@
 TEMPLATE = app
-QT -= core gui
+QT += core
+QT -= gui
 CONFIG  += thread warn_on release
 
 HEADERS +=                      \
     Clamity.hh                  \
     Common.hh                   \
     Logger.hh                   \
+    TestSuite.hh                \
 
 SOURCES +=                      \
     Alloc.cc                    \

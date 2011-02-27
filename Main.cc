@@ -15,7 +15,9 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Clamity.hh"
+#include "TestSuite.hh"
+
+#include <QPluginLoader>
 
 #include <fstream>
 #include <iostream>
@@ -37,37 +39,62 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     log = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
 }
 
-void Clamity::testDevice() {
+static void testDevice(Clamity &subject, TestSuites &suites) {
     using boost::format;
     using boost::str;
 
-    std::string name = device.getInfo<CL_DEVICE_NAME>();
+    Logger &log = subject.log;
 
-    log(LOG_INFO,str(format("Clamity test started for %s ") % name));
-    // logfile << "clamity test started for " << name << std::endl;
-    //logfile << std::endl;
+    std::string name = subject.device.getInfo<CL_DEVICE_NAME>();
+
+    log(LOG_INFO, str(format("Clamity testing started for '%s'") % name));
 
     // Log device info
     // In case of a bug report, this is critical
-    logInfo();
+    subject.logInfo();
 
     // Run the most basic tests first
-    testAlloc();
-    testBasic();
-    memBasic();
-    memBasicAnd();
-    basicADD();
-    basicMULT();
-    basicFMAD();
-    basicALU();
+    subject.testAlloc();
+    subject.testBasic();
+    subject.memBasic();
+    subject.memBasicAnd();
+    subject.basicADD();
+    subject.basicMULT();
+    subject.basicFMAD();
+    subject.basicALU();
     // Flush log now, in case of an exception or crash after
-    logfile.flush();
+    subject.logfile.flush();
 
-    logfile << "clamity test completed for " << name << std::endl;
-    logfile << std::endl;
+    // Run suites once per level, in decreasing order of importance.
+    for (size_t nlevel = 0; nlevel < TestLevelCount; nlevel++) {
+        const TestLevelData &level = TestLevels[nlevel];
+
+        log(LOG_INFO, str(format("Starting %s tests") % level.name));
+
+        foreach(TestSuite *suite, suites) {
+            log(LOG_INFO, str(format("  Suite %s") % suite->suiteName()));
+            suite->runTests(subject, level.level);
+        }
+    }
+
+    log(LOG_INFO, "Clamity testing complete");
+}
+
+static void loadStaticSuites(TestSuites *suites) {
+    foreach (QObject *object, QPluginLoader::staticInstances()) {
+       TestSuite *suite = qobject_cast<TestSuite *>(object);
+       if (suite != NULL)
+           suites->push_back(suite);
+    }
 }
 
 int main(int argc, char **argv) {
+    // Vector of all test suites found via plugins.
+    TestSuites suites;
+
+    // Load static test suite plugins.
+    loadStaticSuites(&suites);
+
     // Discover all OpenCL platforms
     // In general, each platform belongs to a specific vendor
     std::vector<cl::Platform> platforms;
@@ -85,8 +112,8 @@ int main(int argc, char **argv) {
                 cl::Device device = devices.at(ndevice);
 
                 // Invoke tests in order, log to stdout
-                Clamity test(std::cout, device);
-                test.testDevice();
+                Clamity subject(std::cout, device);
+                testDevice(subject, suites);
             }
         }
     } catch (cl::Error error) {

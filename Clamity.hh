@@ -37,7 +37,6 @@ public:
 
     // main.cpp
     Clamity(std::ostream &logfile, cl::Device &device);
-    void testDevice();
 
     // info.cpp
     void logInfo();
