@@ -1,23 +1,23 @@
 TEMPLATE = app
-CONFIG  += thread warn_on release
 QT -= core gui
+CONFIG  += thread warn_on release
 
-HEADERS += \
-    Clamity.hh \
-    Logger.hh
+HEADERS +=                      \
+    Clamity.hh                  \
+    Logger.hh                   \
 
-SOURCES += \
-    Main.cc \
-    Tools.cc \
-    Info.cc \
-    Alloc.cc \
-    Basic.cc \
-    MemBasic.cc \
-    MemAnd.cc \
-    Arithmetic.cc \
-    Logger.cc
+SOURCES +=                      \
+    Alloc.cc                    \
+    Arithmetic.cc               \
+    Basic.cc                    \
+    Info.cc                     \
+    Logger.cc                   \
+    Main.cc                     \
+    MemAnd.cc                   \
+    MemBasic.cc                 \
+    Tools.cc                    \
 
-LIBS += \
-    -lOpenCL
+LIBS +=                         \
+    -lOpenCL                    \
 
 QMAKE_CXXFLAGS += -DCLAMITY_DEBUG
