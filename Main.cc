@@ -17,10 +17,6 @@
 
 #include "Clamity.hh"
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -71,18 +67,7 @@ void Clamity::testDevice() {
     logfile << std::endl;
 }
 
-static std::string logFileName(size_t nplatform, size_t ndevice, cl::Device &device) {
-    std::ostringstream out;
-    out << "clamity-" << nplatform << "-" << ndevice << "-";
-    out << device.getInfo<CL_DEVICE_NAME>();
-    out << ".txt";
-    return out.str();
-}
-
 int main(int argc, char **argv) {
-    // Number of child processes active
-    size_t nchildren = 0;
-
     // Discover all OpenCL platforms
     // In general, each platform belongs to a specific vendor
     std::vector<cl::Platform> platforms;
@@ -99,59 +84,14 @@ int main(int argc, char **argv) {
             for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
                 cl::Device device = devices.at(ndevice);
 
-#ifdef CLAMITY_DEBUG
-
                 // Invoke tests in order, log to stdout
                 Clamity test(std::cout, device);
                 test.testDevice();
-                continue;
-
-
-#endif
-
-                // Fork a child process to test this device
-                const pid_t pid = ::fork();
-
-                std::string logname = logFileName(nplatform, ndevice, device);
-
-                if (pid == 0) { // child process
-                    // Allows the OpenCL implementation to
-                    // release platform and device resources
-                    platforms.clear();
-                    devices.clear();
-
-                    // Open log file
-                    std::ofstream logfile;
-                    logfile.open(logname.c_str());
-
-                    // Invoke tests
-                    Clamity test(logfile, device);
-                    test.testDevice();
-
-                    // Flush explicitly, in case an exception must be traced
-                    logfile.flush();
-                    logfile.close();
-                    return 0;
-                } else { // parent process
-                    nchildren++;
-                    std::cerr << "PID " << pid
-                            << " will write to " << logname << std::endl;
-                }
             }
         }
     } catch (cl::Error error) {
          std::cout << "Test Failed --- ";
          std::cout << error.what() << "(" << error.err() << ")" << std::endl;
-    }
-
-    while (nchildren > 0) {
-        nchildren--;
-
-        int status = 0;
-        const pid_t pid = ::wait(&status);
-
-        std::cerr << "PID " << pid << " has terminated with status " << status
-                << ", " << nchildren << " PIDs left" << std::endl;
     }
 
     return 0;
