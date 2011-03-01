@@ -1,4 +1,4 @@
-// Copyright 2010 Dmitri Nikulin.
+// Copyright 2010 Dmitri Nikulin,Enzo Reyes
 //
 // This file is part of clamity.
 //
@@ -20,16 +20,22 @@
 #include <QFile>
 
 void Clamity::reportCompile(cl::Program &program) {
+
+    using boost::format;
+    using boost::str;
+
     std::string buildlog = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
 
     if (buildlog.size() > 0) {
-        logfile << buildlog << std::endl;
-        logfile << std::endl;
-        logfile.flush();
+        log(LOG_INFO, buildlog);
     }
 }
 
 void Clamity::compile(cl::Program &program, const char *path) {
+
+    using boost::format;
+    using boost::str;
+
     QFile file(path);
 
     if (file.open(QFile::ReadOnly)) {
@@ -40,7 +46,7 @@ void Clamity::compile(cl::Program &program, const char *path) {
         program = cl::Program(context, sources);
 
         try {
-            logfile << "Compiling '" << path << "', " << code.size() << " bytes" << std::endl;
+            log(LOG_INFO,str(format("Compiling '%s' %d bytes") % path  % code.size()));
             program.build(devices, "");
 
             // Save compile log even if successful,
@@ -48,8 +54,10 @@ void Clamity::compile(cl::Program &program, const char *path) {
             reportCompile(program);
         } catch (cl::Error error) {
             // Save compile log if there was a build exception
-            if (error.err() == CL_BUILD_PROGRAM_FAILURE)
+            if (error.err() == CL_BUILD_PROGRAM_FAILURE) {
+                log(LOG_ERROR,"build failed");
                 reportCompile(program);
+            }
 
             // Re-throw the error anyway,
             // so that the whole test fails

@@ -24,12 +24,15 @@
 #include <limits.h>
 
 void ClamityMemory::memBasicAnd(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
+
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
-
-    static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
@@ -42,17 +45,15 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_uint);
 
-    logfile << "Random AND memory test" << std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO, "Random AND memory test");
+    log(LOG_INFO, str(format("Memory Global size : %d Max Alloc Size: %d") % memSize % memAlloc));
 
     if (maxAllocMultiple != 4)
-       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+       log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMemoryCL);
 
-    logfile.flush();
 
     cl::Kernel kern_membasic(program, "testMemAndCL");
 
@@ -81,12 +82,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
@@ -98,14 +98,13 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         if (have != want) {
             good = false;
-            logfile << "Test Failed --- "<<std::endl << "    Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
             return;
         }
     }
 
     if (good == true)
-        logfile <<"    Passed Random Inverse AND" << std::endl;
+        log(LOG_INFO,"Passed Random Inverse AND");
 
     // In this phase of the test we will fill a buffer with random values then
     // Zero one of them, the resultant AND should be zero
@@ -125,12 +124,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
@@ -140,15 +138,13 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         if (have != want) {
             good = false;
-            logfile << "Test Failed --- "<<std::endl<<"   Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
             return;
         }
     }
 
     if (good == true)
-        logfile <<"    Passed Random Zero AND part 1" << std::endl;
-
+        log(LOG_INFO,"    Passed Random Zero AND part 1");
 
     for (size_t i = 0; i < vecCount; i++) {
         randomVal = rand() % UINT_MAX;
@@ -164,12 +160,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
@@ -179,12 +174,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         if (have != want) {
             good = false;
-            logfile << "Test Failed --- "<<std::endl << "    Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
             return;
         }
     }
 
     if (good == true)
-        logfile << "    Passed Random Zero AND part 2" << std::endl;
+        log(LOG_INFO,"    Passed Random Zero AND part 2");
 }

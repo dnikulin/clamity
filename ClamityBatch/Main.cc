@@ -26,11 +26,16 @@
 #include <iostream>
 #include <sstream>
 
-Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
-    : logfile(_logfile), device(_device) {
+#include <boost/program_options.hpp>
+
+Clamity::Clamity(std::ostream &_logfile, cl::Device &_device, unsigned int _maxDiv, double _epsilon)
+    : logfile(_logfile), device(_device),memoryPoolFraction(_maxDiv), epsilonErrorMargin(_epsilon) {
 
     // Retrieve platform from device
     platform = device.getInfo<CL_DEVICE_PLATFORM>();
+
+    using boost::format;
+    using boost::str;
 
     // Create context containing only this device
     std::vector<cl::Device> devices;
@@ -38,7 +43,9 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device)
     context = cl::Context(devices);
 
     // Create logger
-    log = makeStreamLogger(LOG_DEBUG,"CLAMITY",&_logfile);
+    log = makeStreamLogger(LOG_DEBUG,"clamity",&_logfile);
+    log(LOG_INFO, "Clamity OpenCL testing framework has started");
+    log(LOG_INFO,str(format("Epsilon Error Margin set to : %f Memory Pool divisor: 1/%d") % epsilonErrorMargin % memoryPoolFraction));
 }
 
 static void testDevice(Clamity &subject, TestSuites &suites) {
@@ -67,7 +74,7 @@ static void testDevice(Clamity &subject, TestSuites &suites) {
         }
     }
 
-    log(LOG_INFO, "Clamity testing complete");
+    log(LOG_INFO, str(format("Clamity testing complete for '%s") % name));
 }
 
 static void loadSuite(TestSuites *suites, QObject *object, const QString &path) {
@@ -120,6 +127,32 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     Q_UNUSED(app);
 
+    const double errorEpsilonDefault = 1e-5;
+    const unsigned int maxMemDivDefault = 1;
+    double errorEpsilon=0;
+    unsigned int maxMemDiv=0;
+    bool skipCPUTesting = false;
+    boost::program_options::options_description cmdDescription("Allowed Options");
+    cmdDescription.add_options()("help","lists command line arguments and how to use clamity")
+                   ("error-epsilon",boost::program_options::value<double>(&errorEpsilon)->default_value(errorEpsilonDefault),
+                    "Set the error epsilon value for float calculation")
+                   ("max-mem-div",boost::program_options::value<unsigned int>(&maxMemDiv)->default_value(maxMemDivDefault))
+                   ("skip-cpu","Skip the CPU tests");
+
+    boost::program_options::variables_map vm;
+    boost::program_options::store(boost::program_options::parse_command_line(argc,argv,cmdDescription),vm);
+    boost::program_options::notify(vm);
+
+    if(vm.count("help")) {
+        std::cout << cmdDescription <<std::endl;
+        return 0;
+    }
+
+    if(vm.count("skip-cpu")) {
+        skipCPUTesting = true;
+        std::cout<<"Skipping the CPU for testing"<<std::endl;
+    }
+
     // Vector of all test suites found via plugins.
     TestSuites suites;
 
@@ -142,9 +175,10 @@ int main(int argc, char **argv) {
 
             for (size_t ndevice = 0; ndevice < devices.size(); ndevice++) {
                 cl::Device device = devices.at(ndevice);
-
+                if(skipCPUTesting && device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU)
+                    continue;
                 // Invoke tests in order, log to stdout
-                Clamity subject(std::cout, device);
+                Clamity subject(std::cout, device,maxMemDiv,errorEpsilon);
                 testDevice(subject, suites);
             }
         }

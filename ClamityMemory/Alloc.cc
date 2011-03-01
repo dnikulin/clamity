@@ -20,12 +20,16 @@
 #include <iomanip>
 
 void ClamityMemory::testAlloc(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
-    logfile << "Memory allocation" << std::endl;
+    log(LOG_INFO,"Memory allocation");
 
     size_t size = 8;
 
@@ -35,14 +39,12 @@ void ClamityMemory::testAlloc(Clamity &subject) {
             queue.enqueueWriteBuffer(memory, CL_TRUE, 0, sizeof(size), &size);
             queue.enqueueWriteBuffer(memory, CL_TRUE, size - sizeof(size), sizeof(size), &size);
 
-            logfile << "  Allocated and tested edges of " << std::setw(16) << size << " bytes" << std::endl;
+            log(LOG_INFO,str(format("  Allocated and tested edges of '%d' bytes") % size ));
 
             // Double allocation size
             size <<= 1;
         }
     } catch (cl::Error error) {
-        logfile << "  Failed at                     " << std::setw(16) << size << " bytes" << std::endl;
+        log(LOG_ERROR,str(format("  Failed at %d     bytes") % size ));
     }
-
-    logfile << std::endl;
 }

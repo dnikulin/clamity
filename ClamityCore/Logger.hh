@@ -37,13 +37,13 @@ enum LogLevel {
 };
 
 static const char * const LOG_PREFIX[] = {
-    "DEBUG",
-    "INFO",
-    "WARN",
-    "ERROR",
-    "CRITICAL",
-    "ALERT",
-    "PANIC"
+    "debug",
+    "info",
+    "warning",
+    "error",
+    "critical",
+    "alert",
+    "panic"
 };
 
 typedef boost::function<

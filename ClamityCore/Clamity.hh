@@ -34,8 +34,11 @@ public:
     std::vector<cl::Device>     devices;
     cl::Context                 context;
 
+    unsigned int                memoryPoolFraction;
+    double                      epsilonErrorMargin;
+
     // Main.cc
-    Clamity(std::ostream &logfile, cl::Device &device);
+    Clamity(std::ostream &logfile, cl::Device &device,unsigned int _maxDiv, double _epsilon);
 
     // Info.cc
     void logInfo();

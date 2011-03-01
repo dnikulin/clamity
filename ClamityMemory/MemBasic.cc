@@ -18,12 +18,15 @@
 #include "ClamityMemory.hh"
 
 void ClamityMemory::memBasic(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
-    static const size_t groupSize = 256;
     static const unsigned int maxShift = 32;  // We can only shift up to 31 places
 
     unsigned int currShift = 0;  // How many times we have shifted already
@@ -40,17 +43,14 @@ void ClamityMemory::memBasic(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_uint);
 
-    logfile << "Basic memory tests" << std::endl;
-    logfile << "Memory Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO,"Basic memory tests");
+    log(LOG_INFO, str(format("Memory Global size : %d Max Alloc Size: %d") % memSize % memAlloc));
 
     if (maxAllocMultiple != 4)
-       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+       log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMemoryCL);
-
-    logfile.flush();
 
     cl::Kernel kern_membasic(program, "testMemCL");
 
@@ -71,12 +71,11 @@ void ClamityMemory::memBasic(Clamity &subject) {
             kern_membasic.setArg(1, memoryA);
             kern_membasic.setArg(2, memoryB);
 
-            queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+            queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
             queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
         } catch (cl::Error error) {
-            logfile << "Test Failed --- ";
-            logfile << error.what() << "(" << error.err() << ")" << std::endl;
+            log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
             return;
         }
 
@@ -88,14 +87,13 @@ void ClamityMemory::memBasic(Clamity &subject) {
 
             if (have != want) {
                 good = false;
-                logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
-                        << " (have " << have << ", want " << want << ")" << std::endl;
+                log(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ") % i % have % want));
                 return;
             }
         }
 
         if (good == true)
-            logfile << "Shift: " << currShift <<"    Passed" << std::endl;
+            log(LOG_INFO,str(format("Shift: %d ......Passed") % currShift));
 
         currShift++;
 

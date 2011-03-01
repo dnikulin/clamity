@@ -28,7 +28,6 @@ void ClamityMath::testBasic(Clamity &subject) {
 
     static const size_t vecCount = 8192;
     static const size_t vecSize = vecCount * sizeof(cl_uint);
-    static const size_t groupSize = 256;
     static const cl_uint modulo = 1337;
     static const cl_uint shiftSize = 7;
 
@@ -51,7 +50,7 @@ void ClamityMath::testBasic(Clamity &subject) {
     kern_shift.setArg(0, memory);
     kern_shift.setArg(1, shiftSize);
 
-    queue.enqueueNDRangeKernel(kern_shift, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+    queue.enqueueNDRangeKernel(kern_shift, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
     queue.enqueueReadBuffer(memory, CL_TRUE, 0, vecSize, data.data());
 

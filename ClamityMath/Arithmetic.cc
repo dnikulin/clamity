@@ -26,33 +26,38 @@
 
 #include <cmath>  /* for std::abs(double) */
 
-static bool isEqual(double x, double y)
+static bool isEqual(double x, double y, double epsilonErrorMargin)
 {
-    const double epsilon = 1e-5; /* some small number such as 1e-5 */;
-    return std::abs(x - y) <= epsilon * std::abs(x);
-    // see Knuth section 4.2.2 pages 217-218
+    return std::abs(x - y) <= epsilonErrorMargin * std::abs(x);
 }
 
-static bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCount, std::ostream  &logfile) {
+static bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCount, Logger &log, double epsilonErrorMargin) {
+
+    using boost::format;
+    using boost::str;
+
     for (size_t i = 0; i < vecCount; i++) {
         const cl_float have = data[i];
         const cl_float want = wanted[i];
-        if (!isEqual(have, want)) {
-            logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
-                    << " (have gpu: " << have << ", want cpu:" << want << ")" << std::endl;
-            //return false;
+        if (!isEqual(have, want, epsilonErrorMargin)) {
+            log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (GPU has: %f - CPU Has: %f)") % i \
+                    % have % want ));
+            return false;
         }
     }
     return true;
 }
 
 void ClamityMath::basicALU(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
-    static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
@@ -65,31 +70,26 @@ void ClamityMath::basicALU(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_float);
 
-    logfile << "Basic ALU tests" << std::endl;
-    logfile << "Testing for A = A + (B * C) - Executing over 65535 iterations" <<std::endl;
-    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO,"Basic ALU tests");
+    log(LOG_INFO,"Testing for A = A + (B * C) - Executing over 65535 iterations");
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
 
     if (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU) {
-       logfile << "CPU device detected skipping.... " << std::endl;
+       log(LOG_INFO,"CPU device detected skipping.... ");
        return;
     }
 
     if (maxAllocMultiple != 4)
-       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+       log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMathCL);
 
-    logfile.flush();
-
     cl::Kernel kern_membasic(program, "testALU");
 
-    //std::vector<cl_float4> data(vecCount);
-    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    std::vector<cl_float> data(vecCount);
+    std::vector<cl_float> dataA(vecCount);
+    std::vector<cl_float> dataB(vecCount);
 
     for (size_t i = 0; i < vecCount; i++) {
         data[i]  =  rand() % UINT_MAX;
@@ -101,46 +101,41 @@ void ClamityMath::basicALU(Clamity &subject) {
     cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
-    logfile << "Executing test kernel " << std::endl;
+    log(LOG_INFO,"Executing test kernel ");
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
-        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB.data());
+        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
         queue.finish();
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
-        free(dataA);
-        free(dataB);
-        free(results);
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
-    logfile << "  Test Passed" << std::endl;
+    log(LOG_INFO,"  Test Passed");
 
-    free(data);
-    free(dataA);
-    free(dataB);
-    free(results);
 }
 
 void ClamityMath::basicFMAD(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
+    double epsilonErrorMargin = subject.epsilonErrorMargin;
 
-    static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
@@ -153,28 +148,24 @@ void ClamityMath::basicFMAD(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_float);
 
-    logfile << "Basic ALU tests" << std::endl;
-    logfile << "Testing for A = A + (B * C)" <<std::endl;
-    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO,"Basic ALU tests");
+    log(LOG_INFO,"Testing for A = A + (B * C)");
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
 
     if (maxAllocMultiple != 4)
-       logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+       log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMathCL);
 
-    logfile.flush();
-
     cl::Kernel kern_membasic(program, "BasicFMAD");
 
-    //std::vector<cl_float4> data(vecCount);
-    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    std::vector<cl_float> data(vecCount);
+    std::vector<cl_float> dataA(vecCount);
+    std::vector<cl_float> dataB(vecCount);
+    std::vector<cl_float> results(vecCount);
 
-    logfile <<"Creating results table"<<std::endl;
+    log(LOG_INFO,"Creating results table");
 
     for (size_t i = 0; i < vecCount; i++) {
         data[i]  =  rand() % UINT_MAX;
@@ -187,49 +178,42 @@ void ClamityMath::basicFMAD(Clamity &subject) {
     cl::Buffer memoryB(context, CL_MEM_READ_ONLY, memorySize);
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
-    logfile << "Executing test kernel " << std::endl;
+    log(LOG_INFO,"Executing test kernel ");
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
-        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB.data());
+        queue.enqueueWriteBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
-        free(dataA);
-        free(dataB);
-        free(results);
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
-    logfile << "Verifying results" << std::endl;
-    if (!CheckResults(data, results, vecCount, logfile))
-       logfile<<"  Test Failed!"<<std::endl;
+    log(LOG_INFO,"Verifying results");
+    if (!CheckResults(data.data(), results.data(), vecCount, log,epsilonErrorMargin))
+       log(LOG_ERROR,"  Test Failed!");
     else
-       logfile<<"  Test Passed"<<std::endl;
-
-    free(data);
-    free(dataA);
-    free(dataB);
-    free(results);
+       log(LOG_INFO,"  Test Passed");
 }
 
 void ClamityMath::basicADD(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
-
-    static const size_t groupSize = 256;
+    double epsilonErrorMargin = subject.epsilonErrorMargin;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>() / MEMORY_FRACTION;
@@ -242,23 +226,20 @@ void ClamityMath::basicADD(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_float);
 
-    logfile << "Basic ALU tests" << std::endl;
-    logfile << "Testing for A = B + C" <<std::endl;
-    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO,"Basic ALU tests");
+    log(LOG_INFO,"Testing for A = B + C");
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
 
     if (maxAllocMultiple != 4)
-        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+        log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMathCL);
 
-    logfile.flush();
-
     cl::Kernel kern_membasic(program, "BasicADD");
 
-    //std::vector<cl_float4> data(vecCount);
-    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    std::vector<cl_float> data(vecCount);
+
     for (size_t i = 0; i < vecCount; i++) {
         data[i] = 1;
     }
@@ -268,20 +249,18 @@ void ClamityMath::basicADD(Clamity &subject) {
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, data);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, data);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, data.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, data.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
+        log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
@@ -289,21 +268,21 @@ void ClamityMath::basicADD(Clamity &subject) {
 
     for (size_t i = 0; i < vecCount; i++) {
         const cl_float have = data[i];
-        const cl_float want =  2.0f ; // (i % modulo) << shiftSize;
+        const cl_float want =  2.0f;
 
         if (have != want) {
             good = false;
-            logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have %f want %f)") % i \
+                    % have % want ));
             return;
         }
     }
 
-    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    std::vector<cl_float> dataA(vecCount);
+    std::vector<cl_float> dataB(vecCount);
+    std::vector<cl_float> results(vecCount);
 
-    logfile <<"Testing Random ADD operation " << std::endl;
+    log(LOG_INFO,"Testing Random ADD operation ");
 
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % (UINT_MAX / 2);
@@ -312,44 +291,39 @@ void ClamityMath::basicADD(Clamity &subject) {
     }
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
-        free(dataA);
-        free(dataB);
-        free(results);
+        log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
-    if (!CheckResults(data, results, vecCount, logfile))
-       logfile << "  Test Failed!" << std::endl;
+    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin))
+       log(LOG_ERROR,"  Test Failed!");
     else
-       logfile << "  Test Passed" << std::endl;
+       log(LOG_INFO,"  Test Passed");
 
-    free(data);
-    free(dataA);
-    free(dataB);
-    free(results);
 }
 
 void ClamityMath::basicMULT(Clamity &subject) {
-    std::ostream &logfile = subject.logfile;
+
+    using boost::format;
+    using boost::str;
+
+    Logger &log = subject.log;
     cl::Device &device = subject.device;
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
+    double epsilonErrorMargin = subject.epsilonErrorMargin;
 
-    static const size_t groupSize = 256;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
     size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
@@ -362,26 +336,23 @@ void ClamityMath::basicMULT(Clamity &subject) {
 
     unsigned long memorySize = vecCount * sizeof(cl_float);
 
-    logfile << "Basic ALU tests" << std::endl;
-    logfile << "Testing for A = B * C" <<std::endl;
-    logfile << "Math Global size : " << memSize << " Max Alloc Size: "<<memAlloc <<std::endl;
-    logfile << std::endl;
+    log(LOG_INFO,"Basic ALU tests");
+    log(LOG_INFO,"Testing for A = B * C");
+    log(LOG_INFO,str(format("Math Global size : %d  - Max Alloc Size: %d") % memSize % memAlloc));
 
     if (maxAllocMultiple != 4)
-        logfile << "CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4" <<std::endl;
+        log(LOG_INFO,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
 
     cl::Program program;
     subject.compile(program, ClamityMathCL);
 
-    logfile.flush();
-
     cl::Kernel kern_membasic(program, "BasicMUL");
 
-    //std::vector<cl_float4> data(vecCount);
-    cl_float * dataA = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * dataB = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * data = (cl_float *) malloc(sizeof(cl_float) * vecCount);
-    cl_float * results = (cl_float *) malloc(sizeof(cl_float) * vecCount);
+    std::vector<cl_float> data(vecCount);
+    std::vector<cl_float> dataA(vecCount);
+    std::vector<cl_float> dataB(vecCount);
+    std::vector<cl_float> results(vecCount);
+
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] = 1;
         dataB[i] = 1;
@@ -392,23 +363,18 @@ void ClamityMath::basicMULT(Clamity &subject) {
     cl::Buffer memoryC(context, CL_MEM_WRITE_ONLY, memorySize);
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
-        free(dataA);
-        free(dataB);
-        free(results);
+        log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
@@ -419,13 +385,13 @@ void ClamityMath::basicMULT(Clamity &subject) {
 
         if (have != want) {
             good = false;
-            logfile << "Test Failed --- "<<std::endl<< "    Incorrect value at " << i
-                    << " (have " << have << ", want " << want << ")" << std::endl;
+            log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have %f want %f)") % i \
+                    % have % want ));
             return;
         }
     }
 
-    logfile <<"Testing Random MULT operation " << std::endl;
+    log(LOG_INFO,"Testing Random MULT operation ");
 
     for (size_t i = 0; i < vecCount; i++) {
         dataA[i] =  rand() % (UINT_MAX / 2);
@@ -434,33 +400,24 @@ void ClamityMath::basicMULT(Clamity &subject) {
     }
 
     try {
-        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA);
-        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB);
+        queue.enqueueWriteBuffer(memoryA, CL_TRUE, 0, memorySize, dataA.data());
+        queue.enqueueWriteBuffer(memoryB, CL_TRUE, 0, memorySize, dataB.data());
 
         kern_membasic.setArg(0, memoryC);
         kern_membasic.setArg(1, memoryA);
         kern_membasic.setArg(2, memoryB);
 
-        queue.enqueueNDRangeKernel(kern_membasic, cl::NDRange(), cl::NDRange(vecCount), cl::NDRange(groupSize));
+        queue.enqueueNDRangeKernel(kern_membasic, cl::NullRange, cl::NDRange(vecCount), cl::NullRange);
 
-        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data);
+        queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        logfile << "Test Failed --- ";
-        logfile << error.what() << "(" << error.err() << ")" << std::endl;
-        free(data);
-        free(dataA);
-        free(dataB);
-        free(results);
+        log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
         return;
     }
 
-    if (!CheckResults(data, results, vecCount, logfile))
-       logfile << "  Test Failed!" << std::endl;
+    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin))
+       log(LOG_ERROR,"  Test Failed!");
     else
-       logfile << "  Test Passed" << std::endl;
+       log(LOG_INFO,"  Test Passed");
 
-    free(data);
-    free(dataA);
-    free(dataB);
-    free(results);
 }
