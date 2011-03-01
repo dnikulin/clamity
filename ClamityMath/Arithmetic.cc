@@ -270,7 +270,7 @@ void ClamityMath::basicADD(Clamity &subject) {
         const cl_float have = data[i];
         const cl_float want =  2.0f;
 
-        if (have != want) {
+        if (isEqual(have,want,epsilonErrorMargin)) {
             good = false;
             log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have %f want %f)") % i \
                     % have % want ));
@@ -383,7 +383,7 @@ void ClamityMath::basicMULT(Clamity &subject) {
         const cl_float have = data[i];
         const cl_float want =  1.0f ; // (i % modulo) << shiftSize;
 
-        if (have != want) {
+        if (isEqual(have,want,epsilonErrorMargin)) {
             good = false;
             log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have %f want %f)") % i \
                     % have % want ));
