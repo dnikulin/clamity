@@ -40,8 +40,8 @@ static bool CheckResults(cl_float * data, cl_float * wanted, unsigned int vecCou
         const cl_float have = data[i];
         const cl_float want = wanted[i];
         if (!isEqual(have, want, epsilonErrorMargin)) {
-            log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (GPU has: %f - CPU Has: %f)") % i \
-                    % have % want ));
+            log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (GPU has: %f - CPU Has: %f diff: %f)") % i \
+                    % have % want %(have-want) ));
             return false;
         }
     }
