@@ -35,7 +35,7 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
     cl::CommandQueue queue(context, device);
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/MEMORY_FRACTION;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/subject.memoryPoolFraction;
 
     // Work out group size
     size_t vecCount  = memAlloc / sizeof(cl_uint);
