@@ -46,6 +46,7 @@ public:
     // Tools.cc
     void reportCompile(cl::Program &program);
     void compile(cl::Program &program, const char *path);
+    unsigned int recommendMemory(unsigned int deviceAllow, unsigned int maxGlobal,unsigned int numberOfBuffers);
 };
 
 // Tools.cc

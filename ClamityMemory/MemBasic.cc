@@ -33,10 +33,12 @@ void ClamityMemory::memBasic(Clamity &subject) {
     unsigned int shiftedVal = 1;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/subject.memoryPoolFraction;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+
+    size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
-    size_t vecCount  = memAlloc / sizeof(cl_uint);
+    size_t vecCount  = maxBuff / sizeof(cl_uint);
 
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;

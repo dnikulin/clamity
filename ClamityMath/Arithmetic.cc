@@ -60,10 +60,11 @@ void ClamityMath::basicALU(Clamity &subject) {
 
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/subject.memoryPoolFraction;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
-    size_t vecCount  = memAlloc / sizeof(cl_float);
+    size_t vecCount  = maxBuff / sizeof(cl_float);
 
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
@@ -72,7 +73,7 @@ void ClamityMath::basicALU(Clamity &subject) {
 
     log(LOG_INFO,"Basic ALU tests");
     log(LOG_INFO,"Testing for A = A + (B * C) - Executing over 65535 iterations");
-    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d Buffer Size: %d") % memSize % memAlloc % maxBuff));
 
     if (device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU) {
        log(LOG_INFO,"CPU device detected skipping.... ");
@@ -138,10 +139,11 @@ void ClamityMath::basicFMAD(Clamity &subject) {
 
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/subject.memoryPoolFraction;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
-    size_t vecCount  = memAlloc / sizeof(cl_float);
+    size_t vecCount  = maxBuff / sizeof(cl_float);
 
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
@@ -150,7 +152,7 @@ void ClamityMath::basicFMAD(Clamity &subject) {
 
     log(LOG_INFO,"Basic ALU tests");
     log(LOG_INFO,"Testing for A = A + (B * C)");
-    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d Buffer Size: %d") % memSize % memAlloc % maxBuff));
 
     if (maxAllocMultiple != 4)
        log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
@@ -216,10 +218,12 @@ void ClamityMath::basicADD(Clamity &subject) {
     double epsilonErrorMargin = subject.epsilonErrorMargin;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>() /subject.memoryPoolFraction;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
-    size_t vecCount  = memAlloc / sizeof(cl_float);
+    size_t vecCount  = maxBuff / sizeof(cl_float);
+
 
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
@@ -228,7 +232,7 @@ void ClamityMath::basicADD(Clamity &subject) {
 
     log(LOG_INFO,"Basic ALU tests");
     log(LOG_INFO,"Testing for A = B + C");
-    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d") % memSize % memAlloc));
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d Buffer Size: %d") % memSize % memAlloc % maxBuff));
 
     if (maxAllocMultiple != 4)
         log(LOG_WARN,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");
@@ -326,10 +330,11 @@ void ClamityMath::basicMULT(Clamity &subject) {
 
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>()/subject.memoryPoolFraction;
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
-    size_t vecCount  = memAlloc / sizeof(cl_float);
+    size_t vecCount  = maxBuff / sizeof(cl_float);
 
     // Is the max alloc size a multiple of 4?
     size_t maxAllocMultiple = memSize / memAlloc;
@@ -338,7 +343,7 @@ void ClamityMath::basicMULT(Clamity &subject) {
 
     log(LOG_INFO,"Basic ALU tests");
     log(LOG_INFO,"Testing for A = B * C");
-    log(LOG_INFO,str(format("Math Global size : %d  - Max Alloc Size: %d") % memSize % memAlloc));
+    log(LOG_INFO,str(format("Math Global size : %d - Max Alloc Size: %d Buffer Size: %d") % memSize % memAlloc % maxBuff));
 
     if (maxAllocMultiple != 4)
         log(LOG_INFO,"CL_DEVICE_MAX_MEM_ALLOC_SIZE not a multiple of 4");

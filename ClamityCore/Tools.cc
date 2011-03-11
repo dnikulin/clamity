@@ -19,6 +19,31 @@
 
 #include <QFile>
 
+
+// Try to work out a buffer size that occupies all of memory
+// removing the dependency on MAX_ALLOC
+unsigned int Clamity::recommendMemory(unsigned int deviceAllow, unsigned int maxGlobal,
+                                      unsigned int numberOfBuffers) {
+    unsigned int buffSize = maxGlobal / numberOfBuffers;
+    unsigned int maxRequest = deviceAllow * numberOfBuffers;
+    if(buffSize < deviceAllow)
+        return buffSize;
+
+    //We are here because the we are requesting a buffer
+    //Bigger than we can allocate according to the driver
+
+    //If the max we can request is less than global return
+    if(maxRequest < maxGlobal)
+        return deviceAllow;
+
+    //We cannot allocate a buffer bigger than deviceAllow
+    //But maxRequest is > than maxGlobal
+    unsigned int maxDelta = maxRequest - maxGlobal;
+
+    //Return the difference b/w these two
+    return (buffSize - maxDelta);
+}
+
 void Clamity::reportCompile(cl::Program &program) {
 
     using boost::format;
