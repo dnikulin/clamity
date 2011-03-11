@@ -30,7 +30,7 @@ void ClamityMath::runTests(Clamity &subject, TestLevel level) {
     switch (level) {
     case CORE:
         testBasic(subject);
-        //basicALU(subject);
+        basicALU(subject);
         basicFMAD(subject);
         basicADD(subject);
         basicMULT(subject);
