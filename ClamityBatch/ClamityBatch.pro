@@ -12,6 +12,7 @@ INCLUDEPATH +=                  \
 LIBS +=                         \
     -L../Release/               \
     -lClamityCore               \
+    -lboost_program_options
 
 SOURCES +=                      \
     Main.cc                     \
