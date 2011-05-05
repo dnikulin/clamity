@@ -1,3 +1,5 @@
+CONFIG   += console
+CONFIG   -= app_bundle
 TEMPLATE = app
 QT -= gui
 
@@ -12,6 +14,9 @@ INCLUDEPATH +=                  \
 LIBS +=                         \
     -L../Release/               \
     -lClamityCore               \
+    -L/opt/local/lib            \
+    -lboost_program_options     \
+    -framework OpenCL
 
 SOURCES +=                      \
     Main.cc                     \
