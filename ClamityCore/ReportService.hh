@@ -1,5 +1,4 @@
-// Copyright 2011 Dmitri Nikulin.
-//
+// Copyright 2011 Enzo Reyes.
 // This file is part of clamity.
 //
 // clamity is free software: you can redistribute it and/or modify
@@ -15,23 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with clamity.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CLAMITY_COMMON_HH
-#define CLAMITY_COMMON_HH
+#ifndef REPORTSERVICE_HH
+#define REPORTSERVICE_HH
 
-// Use standard Boost headers
-#include <boost/cstdint.hpp>
-#include <boost/noncopyable.hpp>
+#include "Common.hh"
 
-// Use standard STL headers
-#include <string>
-#include <vector>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+#include <boost/function.hpp>
 
-#include <iostream>
-#include <fstream>
 
-// Use official OpenCL C++ wrapper in exception mode
-// Failed API calls will abort with cl::Error
-#define __CL_ENABLE_EXCEPTIONS
-#include <CL/cl.hpp>
+typedef boost::function<
+    void (std::string const & /* Test */ , bool const & /* T/F */)
+> TestResult;
 
-#endif // CLAMITY_COMMON_HH
+typedef boost::function<
+        void(std::string const & /* problem description */)
+> ReportLine;
+
+TestResult makeTestOutput(std::ofstream * stream);
+ReportLine makeLineOutout(std::ofstream * stream);
+#endif // REPORTSERVICE_HH

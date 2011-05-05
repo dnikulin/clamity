@@ -20,7 +20,8 @@
 
 #include "Logger.hh"
 
-#define MEMORY_FRACTION 1
+#include "MemoryTools.hh"
+#include "ReportService.hh"
 
 // Structure to bind together common objects during testing
 class Clamity : public boost::noncopyable {
@@ -29,16 +30,24 @@ public:
     std::ostream               &logfile;
     Logger                      log;
 
+    std::ofstream               reportfile;
+    TestResult                  testrun;
+    ReportLine                  testdiag;
+
     cl::Platform                platform;
     cl::Device                  device;
     std::vector<cl::Device>     devices;
     cl::Context                 context;
 
+    MemoryToolsResources        memoryInfo;
+
     unsigned int                memoryPoolFraction;
     double                      epsilonErrorMargin;
+    unsigned int                memorySizeDelta;
 
     // Main.cc
-    Clamity(std::ostream &logfile, cl::Device &device,unsigned int _maxDiv, double _epsilon);
+    Clamity(std::ostream &logfile, cl::Device &device,unsigned int _maxDiv,
+            double _epsilon, unsigned int _memDelta);
 
     // Info.cc
     void logInfo();
@@ -46,7 +55,10 @@ public:
     // Tools.cc
     void reportCompile(cl::Program &program);
     void compile(cl::Program &program, const char *path);
-    unsigned int recommendMemory(unsigned int deviceAllow, unsigned int maxGlobal,unsigned int numberOfBuffers);
+    unsigned int recommendMemory(unsigned int deviceAllow,
+                                 unsigned int maxGlobal,
+                                 unsigned int numberOfBuffers);
+    unsigned int numOfBuffers(cl::Device device);
 };
 
 // Tools.cc

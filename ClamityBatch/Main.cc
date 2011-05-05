@@ -27,9 +27,10 @@
 #include <sstream>
 
 #include <boost/program_options.hpp>
+#include <boost/asio/ip/host_name.hpp>
 
-Clamity::Clamity(std::ostream &_logfile, cl::Device &_device, unsigned int _maxDiv, double _epsilon)
-    : logfile(_logfile), device(_device),memoryPoolFraction(_maxDiv), epsilonErrorMargin(_epsilon) {
+Clamity::Clamity(std::ostream &_logfile, cl::Device &_device, unsigned int _maxDiv, double _epsilon, unsigned int _memDelta)
+    : logfile(_logfile), device(_device),memoryPoolFraction(_maxDiv), epsilonErrorMargin(_epsilon),memorySizeDelta(_memDelta) {
 
     // Retrieve platform from device
     platform = device.getInfo<CL_DEVICE_PLATFORM>();
@@ -46,6 +47,18 @@ Clamity::Clamity(std::ostream &_logfile, cl::Device &_device, unsigned int _maxD
     log = makeStreamLogger(LOG_DEBUG,"clamity",&_logfile);
     log(LOG_INFO, "Clamity OpenCL testing framework has started");
     log(LOG_INFO,str(format("Epsilon Error Margin set to : %f Memory Pool divisor: 1/%d") % epsilonErrorMargin % memoryPoolFraction));
+
+    //Once we have created the logging system
+    //We create the report system which will only output a
+    //file based on clamity.<hostname>.report
+    log(LOG_INFO,str(format("Creating Report file: clamity.%s.report") % boost::asio::ip::host_name()));
+    std::string filename("clamity."+boost::asio::ip::host_name() +".report");
+    this->reportfile.open(filename.c_str());
+
+    //Create the instances of the report files
+    testrun = makeTestOutput( &reportfile );
+    testdiag = makeLineOutout( &reportfile );
+
 }
 
 static void testDevice(Clamity &subject, TestSuites &suites) {
@@ -65,12 +78,18 @@ static void testDevice(Clamity &subject, TestSuites &suites) {
     // Run suites once per level, in decreasing order of importance.
     for (size_t nlevel = 0; nlevel < TestLevelCount; nlevel++) {
         const TestLevelData &level = TestLevels[nlevel];
-
         log(LOG_INFO, str(format("Starting %s tests") % level.name));
-
         foreach(TestSuite *suite, suites) {
-            log(LOG_INFO, str(format("  Suite %s") % suite->suiteName()));
-            suite->runTests(subject, level.level);
+            try {
+                log(LOG_INFO, str(format("  Suite %s") % suite->suiteName()));
+                suite->runTests(subject, level.level);
+            } catch (cl::Error error) {
+                 std::cout << "Test Failed --- ";
+                 std::cout << error.what() << "(" << error.err() << ")" << std::endl;
+                 subject.testrun(str(format("Suite %s ")% suite->suiteName()),false);
+                 subject.testdiag(str(format("Error as follows: %s") % error.what()));
+                 subject.reportfile.flush();
+            }
         }
     }
 
@@ -129,14 +148,19 @@ int main(int argc, char **argv) {
 
     const double errorEpsilonDefault = 1e-5;
     const unsigned int maxMemDivDefault = 1;
+    const unsigned int defaultMemDetla = 10;
     double errorEpsilon=0;
     unsigned int maxMemDiv=0;
+    unsigned int memDelta = 0;
     bool skipCPUTesting = false;
     boost::program_options::options_description cmdDescription("Allowed Options");
     cmdDescription.add_options()("help","lists command line arguments and how to use clamity")
                    ("error-epsilon",boost::program_options::value<double>(&errorEpsilon)->default_value(errorEpsilonDefault),
                     "Set the error epsilon value for float calculation")
-                   ("max-mem-div",boost::program_options::value<unsigned int>(&maxMemDiv)->default_value(maxMemDivDefault))
+                   ("mem-delta",boost::program_options::value<unsigned int>(&memDelta)->default_value(defaultMemDetla),
+                    "Sets the memory size delta, for buffer allocations")
+                   ("max-mem-div",boost::program_options::value<unsigned int>(&maxMemDiv)->default_value(maxMemDivDefault),
+                    "Divides any buffer allocation calculation by this size useful for tests that over allocate")
                    ("skip-cpu","Skip the CPU tests");
 
     boost::program_options::variables_map vm;
@@ -178,7 +202,7 @@ int main(int argc, char **argv) {
                 if(skipCPUTesting && device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU)
                     continue;
                 // Invoke tests in order, log to stdout
-                Clamity subject(std::cout, device,maxMemDiv,errorEpsilon);
+                Clamity subject(std::cout, device,maxMemDiv,errorEpsilon,memDelta);
                 testDevice(subject, suites);
             }
         }

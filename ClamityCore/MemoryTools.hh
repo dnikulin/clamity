@@ -23,7 +23,6 @@
 
 typedef struct __MemoryToolResource {
 
-    cl::Platform                platform;
     cl::Device                  device;
     cl::Context                 context;
 

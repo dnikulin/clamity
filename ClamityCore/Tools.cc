@@ -20,6 +20,77 @@
 #include <QFile>
 
 
+// Work out the number of buffers required to allocate
+// all memory on the device
+unsigned int Clamity::numOfBuffers(cl::Device device) {
+    memoryInfo.device = device;
+
+    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+
+    if(memSize < memAlloc)
+        memoryInfo.numOfBuffers = 1;
+    else if( memSize > memAlloc)
+        memoryInfo.numOfBuffers = (memSize - ((this->memorySizeDelta * 100)/memSize)) / memAlloc;
+
+    return memoryInfo.numOfBuffers;
+}
+
+
+// Work out the maximum size you can allocated from this
+// device - no the max alloc size - but what the device
+// will return
+    /*
+unsigned int Clamity::maxMemoryAllocation(cl::Device device,
+                                          cl::Context context) {
+    bool success = false;
+    if(memoryInfo.device != device) {
+
+        //Obtain the memory sizes
+        size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+        size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+
+        //pre calculate the first 10% shrink
+
+        unsigned int memShrink = memSize -  ((this->memorySizeDelta * 100) / memSize);
+
+        //We have an allocation that is bigger than the possible
+        //global memory on the device... try allocating upto the
+        //the global size minus a delta (around 10% of the global size)
+        if(memSize < memAlloc) {
+            while(1) {
+                try {
+                    cl::Buffer memory(context, CL_MEM_READ_WRITE, memSize - memShrink);
+                    queue.enqueueWriteBuffer(memory, CL_TRUE, 0, sizeof(memSize), &size);
+                    success = true;
+                    break;
+                } catch (cl::Error error) {
+                    //Shrink the memory Size
+                    memSize = memSize - memShrink;
+                    //Check if the memory Size is now smaller than the delta
+                    if(memSize < MemShrink)
+                        break;
+                    //Continue the loop
+                    continue;
+                }
+            }
+            if(success) {
+                memoryInfo.device = device;
+                memoryInfo.maxMemory = memSize;
+                return memSize;
+            }
+            else {
+                log(LOG_PANIC, "There has been an error Allocating memory on the device");
+                return 0;
+            }
+        }
+
+    }
+
+    return memoryInfo.maxMemory;
+}*/
+
+
 // Try to work out a buffer size that occupies all of memory
 // removing the dependency on MAX_ALLOC
 unsigned int Clamity::recommendMemory(unsigned int deviceAllow, unsigned int maxGlobal,
