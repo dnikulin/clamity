@@ -36,59 +36,20 @@ unsigned int Clamity::numOfBuffers(cl::Device device) {
     return memoryInfo.numOfBuffers;
 }
 
+//In case the user over-rides the available memory
+//This functions will act as a mask for the CL versions
 
-// Work out the maximum size you can allocated from this
-// device - no the max alloc size - but what the device
-// will return
-    /*
-unsigned int Clamity::maxMemoryAllocation(cl::Device device,
-                                          cl::Context context) {
-    bool success = false;
-    if(memoryInfo.device != device) {
+unsigned int Clamity::deviceMemoryAvail(cl::Device device) {
+    if(maxmem!=0)
+        return maxmem;
+    return device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+}
 
-        //Obtain the memory sizes
-        size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-        size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
-
-        //pre calculate the first 10% shrink
-
-        unsigned int memShrink = memSize -  ((this->memorySizeDelta * 100) / memSize);
-
-        //We have an allocation that is bigger than the possible
-        //global memory on the device... try allocating upto the
-        //the global size minus a delta (around 10% of the global size)
-        if(memSize < memAlloc) {
-            while(1) {
-                try {
-                    cl::Buffer memory(context, CL_MEM_READ_WRITE, memSize - memShrink);
-                    queue.enqueueWriteBuffer(memory, CL_TRUE, 0, sizeof(memSize), &size);
-                    success = true;
-                    break;
-                } catch (cl::Error error) {
-                    //Shrink the memory Size
-                    memSize = memSize - memShrink;
-                    //Check if the memory Size is now smaller than the delta
-                    if(memSize < MemShrink)
-                        break;
-                    //Continue the loop
-                    continue;
-                }
-            }
-            if(success) {
-                memoryInfo.device = device;
-                memoryInfo.maxMemory = memSize;
-                return memSize;
-            }
-            else {
-                log(LOG_PANIC, "There has been an error Allocating memory on the device");
-                return 0;
-            }
-        }
-
-    }
-
-    return memoryInfo.maxMemory;
-}*/
+unsigned int Clamity::maxMemoryAllocation(cl::Device device) {
+    if(maxalloc!=0)
+        return maxalloc;
+    return device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+}
 
 
 // Try to work out a buffer size that occupies all of memory

@@ -26,11 +26,18 @@ std::string ClamityMemory::suiteName() const {
     return "clamity memory";
 }
 
+void  ClamityMemory::processError(bool isError, Clamity &subject, std::string test) {
+    if(!isError) {
+        subject.testrun(test,isError);
+        subject.testdiag(getErrorString(getErrorType(this->errorReported)));
+    }
+}
+
 void ClamityMemory::runTests(Clamity &subject, TestLevel level) {
     switch (level) {
     case CORE:
         testAlloc(subject);
-        memBasic(subject);
+        processError(memBasic(subject),subject,"Memory Basic");
         memBasicAnd(subject);
         break;
 

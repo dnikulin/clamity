@@ -53,4 +53,5 @@ typedef boost::function<
 Logger makeSimpleLogger(LogLevel threshold, std::string const & prefix);
 Logger makeStreamLogger(LogLevel threshold, std::string const & prefix, std::ostream * stream);
 
+
 #endif // CLAMITY_LOGGER_HH

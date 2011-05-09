@@ -17,7 +17,7 @@
 
 #include "ClamityMemory.hh"
 
-void ClamityMemory::memBasic(Clamity &subject) {
+bool ClamityMemory::memBasic(Clamity &subject) {
 
     using boost::format;
     using boost::str;
@@ -78,7 +78,10 @@ void ClamityMemory::memBasic(Clamity &subject) {
             queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
         } catch (cl::Error error) {
             log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
-            return;
+            testLevel = TEST_PANIC;
+            //Get a generic descriptor of the error at hand
+            errorReported = getErrorType(error.err());
+            return false;
         }
 
         bool good = true;
@@ -90,7 +93,8 @@ void ClamityMemory::memBasic(Clamity &subject) {
             if (have != want) {
                 good = false;
                 log(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ") % i % have % want));
-                return;
+                testLevel = TEST_ERROR;
+                return false;
             }
         }
 
@@ -104,4 +108,5 @@ void ClamityMemory::memBasic(Clamity &subject) {
 
         shiftedVal <<= currShift;
     } while (currShift < maxShift);
+    return true;
 }

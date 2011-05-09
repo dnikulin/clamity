@@ -44,3 +44,29 @@ ReportLine makeLineOutout(std::ofstream * stream) {
     return boost::bind(reportLine,stream, _1);
 }
 
+ErrorTypes getErrorType(int errorLevel) {
+
+    if(errorLevel==CL_OUT_OF_RESOURCES )
+        return ERROR_MEM_EXHAUSTED;
+    else if(errorLevel==CL_MEM_OBJECT_ALLOCATION_FAILURE )
+        return ERROR_MEM_OBJ_BUFFER;
+    else
+        return ERROR_GENERAL_FAILURE;
+}
+
+std::string getErrorString(ErrorTypes errorLevel) {
+
+    switch(errorLevel) {
+        case ERROR_MEM_EXHAUSTED:
+            return "The memory on the test has been exhausted, \
+                    This might be due to the amount of memory available in the \
+                    system has been decreased by other applications";
+        case ERROR_MEM_OBJ_BUFFER:
+            return "The Object buffers on the device are full, this indicates \
+                    System usage of the device (COMPOSITING MANAGERS)";
+        case ERROR_GENERAL_FAILURE:
+            return "The test has failed due to unknown circumstances please see \
+                    Log file for details";
+     }
+
+}

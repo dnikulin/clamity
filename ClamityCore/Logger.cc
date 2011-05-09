@@ -41,3 +41,4 @@ Logger makeStreamLogger(LogLevel threshold, std::string const & prefix, std::ost
 Logger makeSimpleLogger(LogLevel threshold, std::string const & prefix) {
     return makeStreamLogger(threshold, prefix, &std::cerr);
 }
+

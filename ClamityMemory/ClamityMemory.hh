@@ -24,6 +24,10 @@ class ClamityMemory : public QObject, public TestSuite {
     Q_OBJECT;
     Q_INTERFACES(TestSuite);
 
+private:
+    TestReportLevel testLevel;
+    ErrorTypes errorReported;
+    void processError(bool isError, Clamity &subject, std::string test);
 public:
 
     ClamityMemory();
@@ -33,7 +37,7 @@ public:
     virtual void runTests(Clamity &subject, TestLevel level);
 
     void testAlloc(Clamity &subject);
-    void memBasic(Clamity &subject);
+    bool memBasic(Clamity &subject);
     void memBasicAnd(Clamity &subject);
 };
 

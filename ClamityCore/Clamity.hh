@@ -23,14 +23,23 @@
 #include "MemoryTools.hh"
 #include "ReportService.hh"
 
+
+
 // Structure to bind together common objects during testing
 class Clamity : public boost::noncopyable {
+
+private:
+
+    std::ofstream               &reportfile;
+    MemoryToolsResources        memoryInfo;
+    unsigned int                maxalloc;
+    unsigned int                maxmem;
+
 public:
 
     std::ostream               &logfile;
     Logger                      log;
 
-    std::ofstream               reportfile;
     TestResult                  testrun;
     ReportLine                  testdiag;
 
@@ -39,15 +48,17 @@ public:
     std::vector<cl::Device>     devices;
     cl::Context                 context;
 
-    MemoryToolsResources        memoryInfo;
 
     unsigned int                memoryPoolFraction;
     double                      epsilonErrorMargin;
     unsigned int                memorySizeDelta;
 
     // Main.cc
-    Clamity(std::ostream &logfile, cl::Device &device,unsigned int _maxDiv,
-            double _epsilon, unsigned int _memDelta);
+    Clamity(std::ostream &logfile,std::ofstream &reportfile,
+            cl::Device &device,unsigned int _maxDiv,
+            double _epsilon, unsigned int _memDelta,
+            unsigned int _loglevel, unsigned int _maxalloc,
+            unsigned int _maxmem);
 
     // Info.cc
     void logInfo();
@@ -59,6 +70,8 @@ public:
                                  unsigned int maxGlobal,
                                  unsigned int numberOfBuffers);
     unsigned int numOfBuffers(cl::Device device);
+    unsigned int maxMemoryAllocation(cl::Device device);
+    unsigned int deviceMemoryAvail(cl::Device device);
 };
 
 // Tools.cc

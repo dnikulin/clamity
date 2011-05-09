@@ -28,119 +28,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/asio/ip/host_name.hpp>
-
-Clamity::Clamity(std::ostream &_logfile, cl::Device &_device, unsigned int _maxDiv, double _epsilon, unsigned int _memDelta)
-    : logfile(_logfile), device(_device),memoryPoolFraction(_maxDiv), epsilonErrorMargin(_epsilon),memorySizeDelta(_memDelta) {
-
-    // Retrieve platform from device
-    platform = device.getInfo<CL_DEVICE_PLATFORM>();
-
-    using boost::format;
-    using boost::str;
-
-    // Create context containing only this device
-    std::vector<cl::Device> devices;
-    devices.push_back(device);
-    context = cl::Context(devices);
-
-    // Create logger
-    log = makeStreamLogger(LOG_DEBUG,"clamity",&_logfile);
-    log(LOG_INFO, "Clamity OpenCL testing framework has started");
-    log(LOG_INFO,str(format("Epsilon Error Margin set to : %f Memory Pool divisor: 1/%d") % epsilonErrorMargin % memoryPoolFraction));
-
-    //Once we have created the logging system
-    //We create the report system which will only output a
-    //file based on clamity.<hostname>.report
-    log(LOG_INFO,str(format("Creating Report file: clamity.%s.report") % boost::asio::ip::host_name()));
-    std::string filename("clamity."+boost::asio::ip::host_name() +".report");
-    this->reportfile.open(filename.c_str());
-
-    //Create the instances of the report files
-    testrun = makeTestOutput( &reportfile );
-    testdiag = makeLineOutout( &reportfile );
-
-}
-
-static void testDevice(Clamity &subject, TestSuites &suites) {
-    using boost::format;
-    using boost::str;
-
-    Logger &log = subject.log;
-
-    std::string name = subject.device.getInfo<CL_DEVICE_NAME>();
-
-    log(LOG_INFO, str(format("Clamity testing started for '%s'") % name));
-
-    // Log device info
-    // In case of a bug report, this is critical
-    subject.logInfo();
-
-    // Run suites once per level, in decreasing order of importance.
-    for (size_t nlevel = 0; nlevel < TestLevelCount; nlevel++) {
-        const TestLevelData &level = TestLevels[nlevel];
-        log(LOG_INFO, str(format("Starting %s tests") % level.name));
-        foreach(TestSuite *suite, suites) {
-            try {
-                log(LOG_INFO, str(format("  Suite %s") % suite->suiteName()));
-                suite->runTests(subject, level.level);
-            } catch (cl::Error error) {
-                 std::cout << "Test Failed --- ";
-                 std::cout << error.what() << "(" << error.err() << ")" << std::endl;
-                 subject.testrun(str(format("Suite %s ")% suite->suiteName()),false);
-                 subject.testdiag(str(format("Error as follows: %s") % error.what()));
-                 subject.reportfile.flush();
-            }
-        }
-    }
-
-    log(LOG_INFO, str(format("Clamity testing complete for '%s") % name));
-}
-
-static void loadSuite(TestSuites *suites, QObject *object, const QString &path) {
-    TestSuite *suite = qobject_cast<TestSuite *>(object);
-    if (suite != NULL) {
-        suites->push_back(suite);
-
-        std::cerr
-            << "Loaded suite '" << suite->suiteName()
-            << "' from '" << path.toStdString()
-            << "'" << std::endl << std::flush;
-    }
-}
-
-static void loadDynamicSuites(TestSuites *suites) {
-    // Start from binary directory
-    QDir root(qApp->applicationDirPath());
-
-    // Move down to Plugins directory
-    root.cd("Plugins");
-
-    foreach (QString name, root.entryList(QDir::Files)) {
-        QString path(root.absoluteFilePath(name));
-
-        std::cerr
-            << "Loading '" << path.toStdString()
-            << "'" << std::endl << std::flush;
-
-        QPluginLoader loader(path);
-
-        if (loader.load() == false) {
-            std::cerr
-                << "  " << loader.errorString().toStdString()
-                << std::endl << std::flush;
-            continue;
-        }
-
-        QObject *object = loader.instance();
-        if (object != NULL)
-            loadSuite(suites, object, path);
-    }
-}
-
-static void loadStaticSuites(TestSuites *suites) {
-    foreach (QObject *object, QPluginLoader::staticInstances())
-        loadSuite(suites, object, "static plugin");
-}
+#include "Clamity.hh"
 
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
@@ -152,22 +40,41 @@ int main(int argc, char **argv) {
     double errorEpsilon=0;
     unsigned int maxMemDiv=0;
     unsigned int memDelta = 0;
+    unsigned int maxAlloc = 0;
+    unsigned int logLevel = 1;
+    unsigned int maxDev = 0;
     bool skipCPUTesting = false;
+    bool writeLog = false;
+
+    std::ofstream reportfile;
+    std::ostream *outstream;
+
     boost::program_options::options_description cmdDescription("Allowed Options");
     cmdDescription.add_options()("help","lists command line arguments and how to use clamity")
                    ("error-epsilon",boost::program_options::value<double>(&errorEpsilon)->default_value(errorEpsilonDefault),
                     "Set the error epsilon value for float calculation")
                    ("mem-delta",boost::program_options::value<unsigned int>(&memDelta)->default_value(defaultMemDetla),
                     "Sets the memory size delta, for buffer allocations")
+                   ("mem-max-alloc",boost::program_options::value<unsigned int>(&maxAlloc)->default_value(0),
+                    "Sets the maximum buffer size in BYTES")
+                   ("mem-dev-max",boost::program_options::value<unsigned int>(&maxDev)->default_value(0),
+                    "Sets the maximum global size in BYTES")
                    ("max-mem-div",boost::program_options::value<unsigned int>(&maxMemDiv)->default_value(maxMemDivDefault),
                     "Divides any buffer allocation calculation by this size useful for tests that over allocate")
-                   ("skip-cpu","Skip the CPU tests");
+                   ("skip-cpu","Skip the CPU tests")
+                   ("log-tofile","writes the log output to a file rather than stdout")
+                   ("log-level",boost::program_options::value<unsigned int>(&logLevel)->default_value(1),
+                    "Determines the logging verbosity of clamity");
 
     boost::program_options::variables_map vm;
     boost::program_options::store(boost::program_options::parse_command_line(argc,argv,cmdDescription),vm);
     boost::program_options::notify(vm);
 
     if(vm.count("help")) {
+        std::cout << "Clamity OpenCL Testing platform version 0.5.0a" <<std::endl;
+        std::cout << "copyright Enzo Reyes, Dmitri Nikulin Licenced under GPLv3" <<std::endl;
+        std::cout << "See the file COPYING for details" <<std::endl;
+        std::cout << std::endl;
         std::cout << cmdDescription <<std::endl;
         return 0;
     }
@@ -176,6 +83,20 @@ int main(int argc, char **argv) {
         skipCPUTesting = true;
         std::cout<<"Skipping the CPU for testing"<<std::endl;
     }
+
+    std::ofstream logfile;
+    if(vm.count ("log-tofile")) {
+        writeLog = true;
+        std::string logfilename("clamity."+boost::asio::ip::host_name() +".log");
+        logfile.open(logfilename.c_str ());
+        outstream = &logfile;
+    }
+    else
+        outstream = &std::cout;
+
+    //Set up the report file output
+    std::string filename("clamity."+boost::asio::ip::host_name() +".report");
+    reportfile.open(filename.c_str());
 
     // Vector of all test suites found via plugins.
     TestSuites suites;
@@ -202,13 +123,24 @@ int main(int argc, char **argv) {
                 if(skipCPUTesting && device.getInfo<CL_DEVICE_TYPE>() == CL_DEVICE_TYPE_CPU)
                     continue;
                 // Invoke tests in order, log to stdout
-                Clamity subject(std::cout, device,maxMemDiv,errorEpsilon,memDelta);
+                Clamity subject(*outstream,reportfile, device,maxMemDiv,
+                                errorEpsilon,memDelta, logLevel,
+                                maxAlloc,maxDev);
                 testDevice(subject, suites);
             }
         }
     } catch (cl::Error error) {
          std::cout << "Test Failed --- ";
          std::cout << error.what() << "(" << error.err() << ")" << std::endl;
+    }
+
+    //Close the report output
+    reportfile.flush ();
+    reportfile.close ();
+
+    if(writeLog) {
+        logfile.flush ();
+        logfile.close ();;
     }
 
     return 0;

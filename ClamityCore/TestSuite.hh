@@ -56,4 +56,9 @@ Q_DECLARE_INTERFACE(TestSuite, "org.clamity.TestSuite/1.0");
 
 typedef QVector<TestSuite *> TestSuites;
 
+void testDevice(Clamity &subject, TestSuites &suites);
+void loadSuite(TestSuites *suites, QObject *object, const QString &path);
+void loadDynamicSuites(TestSuites *suites);
+void loadStaticSuites(TestSuites *suites);
+
 #endif // CLAMITY_TEST_SUITE_HH

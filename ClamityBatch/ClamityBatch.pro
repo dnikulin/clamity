@@ -16,7 +16,7 @@ LIBS +=                         \
     -lClamityCore               \
     -L/opt/local/lib            \
     -lboost_program_options     \
-    -framework OpenCL
+    -lboost_system    
 
 SOURCES +=                      \
     Main.cc                     \
