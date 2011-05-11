@@ -27,7 +27,6 @@ class ClamityMemory : public QObject, public TestSuite {
 private:
     TestReportLevel testLevel;
     ErrorTypes errorReported;
-    void processError(bool isError, Clamity &subject, std::string test);
 public:
 
     ClamityMemory();
@@ -38,7 +37,7 @@ public:
 
     void testAlloc(Clamity &subject);
     bool memBasic(Clamity &subject);
-    void memBasicAnd(Clamity &subject);
+    bool memBasicAnd(Clamity &subject);
 };
 
 static const char * const ClamityMemoryCL = ":/clamity/memory/ClamityMemory.cl";

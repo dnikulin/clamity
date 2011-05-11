@@ -17,6 +17,9 @@
 #include "Clamity.hh"
 #include "ReportService.hh"
 #include <boost/bind.hpp>
+#include <QFile>
+
+#include <assert.h>
 
 static void reportLine(std::ofstream * stream,
                        std::string const & message) {
@@ -50,23 +53,58 @@ ErrorTypes getErrorType(int errorLevel) {
         return ERROR_MEM_EXHAUSTED;
     else if(errorLevel==CL_MEM_OBJECT_ALLOCATION_FAILURE )
         return ERROR_MEM_OBJ_BUFFER;
-    else
+    else if(errorLevel ==  CL_DEVICE_NOT_FOUND )
+        return ERROR_DEVICE_NOTFOUND;
+    else {
         return ERROR_GENERAL_FAILURE;
+    }
 }
+
+std::string getNoInfoString() {
+    return "No additional data available";
+}
+
+std::string getErrorFromFiles(const char * path) {
+    QFile file(path);
+    file.open(QFile::ReadOnly);
+    QByteArray error = file.readAll();
+    file.close();
+    return std::string(error.data());
+}
+
 
 std::string getErrorString(ErrorTypes errorLevel) {
 
     switch(errorLevel) {
         case ERROR_MEM_EXHAUSTED:
-            return "The memory on the test has been exhausted, \
-                    This might be due to the amount of memory available in the \
-                    system has been decreased by other applications";
+            return getErrorFromFiles(":/clamity/error/ErrorStrings/ERROR_MEM_EXHAUSTED");
+            break;
         case ERROR_MEM_OBJ_BUFFER:
-            return "The Object buffers on the device are full, this indicates \
-                    System usage of the device (COMPOSITING MANAGERS)";
+            return getErrorFromFiles(":/clamity/error/ErrorStrings/ERROR_MEM_OBJ_BUFFER");
+            break;
         case ERROR_GENERAL_FAILURE:
-            return "The test has failed due to unknown circumstances please see \
-                    Log file for details";
+            return getErrorFromFiles(":/clamity/error/ErrorStrings/ERROR_GENERAL_FAILURE");
+            break;
+        case ERROR_DEVICE_NOTFOUND:
+            return getErrorFromFiles(":/clamity/error/ErrorStrings/ERROR_DEVICE_NOTFOUND");
+            break;
+        default:
+            return getNoInfoString();
      }
+    return getNoInfoString();
+}
 
+
+
+bool Clamity::processError(bool isError,const ErrorTypes errorClass,
+                                        const TestReportLevel errLevel,
+                                        std::string test) {
+    if(!isError) {
+        testrun(test,isError);
+        if(TEST_ERROR == errLevel )
+            return true;
+        if(TEST_PANIC == errLevel )
+        testdiag(getErrorString((errorClass)));
+    }
+    return false;
 }

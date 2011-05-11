@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/clamity/error">
+        <file>ErrorStrings/ERROR_GENERAL_FAILURE</file>
+        <file>ErrorStrings/ERROR_MEM_EXHAUSTED</file>
+        <file>ErrorStrings/ERROR_MEM_OBJ_BUFFER</file>
+        <file>ErrorStrings/ERROR_DEVICE_NOTFOUND</file>
+    </qresource>
+</RCC>

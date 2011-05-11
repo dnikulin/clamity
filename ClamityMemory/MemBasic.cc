@@ -32,8 +32,8 @@ bool ClamityMemory::memBasic(Clamity &subject) {
     unsigned int currShift = 0;  // How many times we have shifted already
     unsigned int shiftedVal = 1;
 
-    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memSize  =  subject.deviceMemoryAvail(device);//device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = subject.maxMemoryAllocation(device);     //device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
 
     size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 

@@ -22,7 +22,7 @@
 
 // Work out the number of buffers required to allocate
 // all memory on the device
-unsigned int Clamity::numOfBuffers(cl::Device device) {
+unsigned int Clamity::numOfBuffers(cl::Device &device) {
     memoryInfo.device = device;
 
     size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
@@ -39,13 +39,13 @@ unsigned int Clamity::numOfBuffers(cl::Device device) {
 //In case the user over-rides the available memory
 //This functions will act as a mask for the CL versions
 
-unsigned int Clamity::deviceMemoryAvail(cl::Device device) {
+unsigned int Clamity::deviceMemoryAvail(cl::Device &device) {
     if(maxmem!=0)
         return maxmem;
     return device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
 }
 
-unsigned int Clamity::maxMemoryAllocation(cl::Device device) {
+unsigned int Clamity::maxMemoryAllocation(cl::Device &device) {
     if(maxalloc!=0)
         return maxalloc;
     return device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();

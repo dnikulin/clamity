@@ -25,16 +25,17 @@
 
 enum TestReportLevel {
     TEST_ERROR,    //Normal Error
-    TEST_OK,       //Test passed OK
     TEST_PANIC     //Test internal failure
 };
 
 enum ErrorTypes {
+    ERROR_DEVICE_NOTFOUND = -1, //The device Could not be Found
     ERROR_MEM_EXHAUSTED = -5,  //The memory on the system has run out
     ERROR_MEM_OBJ_BUFFER = -4,     //Out of memory for Objects
     ERROR_MEM_HOST_EXCHAUSTED = -6,  //The memory of the host has exhausted
     ERROR_COMPILER_LOCATION = -3,  //The Compiler could not be allocated
-    ERROR_GENERAL_FAILURE //We dont know what error this is
+    ERROR_GENERAL_FAILURE, //We dont know what error this is
+    ERROR_NONE_INIT //Used for Initialisation only
 };
 
 

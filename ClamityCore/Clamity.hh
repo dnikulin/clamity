@@ -69,9 +69,14 @@ public:
     unsigned int recommendMemory(unsigned int deviceAllow,
                                  unsigned int maxGlobal,
                                  unsigned int numberOfBuffers);
-    unsigned int numOfBuffers(cl::Device device);
-    unsigned int maxMemoryAllocation(cl::Device device);
-    unsigned int deviceMemoryAvail(cl::Device device);
+    unsigned int numOfBuffers(cl::Device &device);
+    unsigned int maxMemoryAllocation(cl::Device &device);
+    unsigned int deviceMemoryAvail(cl::Device &device);
+
+    //ReportService.cc
+    bool processError(bool isError,const ErrorTypes errorClass,
+                                   const TestReportLevel errLevel,
+                                   std::string test);
 };
 
 // Tools.cc

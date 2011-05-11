@@ -46,6 +46,5 @@ void ClamityMemory::testAlloc(Clamity &subject) {
         }
     } catch (cl::Error error) {
         log(LOG_ERROR,str(format("  Failed at %d     bytes") % size ));
-        subject.testrun("Memory alloc test", false);
     }
 }

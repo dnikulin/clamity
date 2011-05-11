@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-void ClamityMemory::memBasicAnd(Clamity &subject) {
+bool ClamityMemory::memBasicAnd(Clamity &subject) {
 
     using boost::format;
     using boost::str;
@@ -34,8 +34,8 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
     cl::Context &context(subject.context);
     cl::CommandQueue queue(context, device);
 
-    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memSize  = subject.deviceMemoryAvail(device); //device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = subject.maxMemoryAllocation(device); //device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
 
     size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
@@ -88,8 +88,12 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
-        return;
+        int errorNumber = error.err();
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % errorNumber));
+        testLevel = TEST_PANIC;
+        //Get a generic descriptor of the error at hand
+        errorReported = getErrorType(errorNumber);
+        return false;
     }
 
     bool good = true;
@@ -101,7 +105,8 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         if (have != want) {
             good = false;
             log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
-            return;
+            testLevel = TEST_ERROR;
+            return false;
         }
     }
 
@@ -130,8 +135,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
-        return;
+        int errorNumber = error.err();
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % errorNumber));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(errorNumber);
+        return false;
     }
 
     for (size_t i = 0; i < vecCount; i++) {
@@ -141,7 +149,8 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         if (have != want) {
             good = false;
             log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
-            return;
+            testLevel = TEST_ERROR;
+            return false;
         }
     }
 
@@ -166,8 +175,11 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
 
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
-        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
-        return;
+        int errorNumber = error.err();
+        log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % errorNumber));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(errorNumber);
+        return false;
     }
 
     for (size_t i = 0; i < vecCount; i++) {
@@ -177,10 +189,12 @@ void ClamityMemory::memBasicAnd(Clamity &subject) {
         if (have != want) {
             good = false;
             log(LOG_ERROR, str(format("    Incorrect at value %d (have: %d want: %d) ") % i % have % want));
-            return;
+            testLevel = TEST_ERROR;
+            return false;
         }
     }
 
     if (good == true)
         log(LOG_INFO,"    Passed Random Zero AND part 2");
+    return true;
 }

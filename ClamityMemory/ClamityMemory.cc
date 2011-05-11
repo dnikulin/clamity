@@ -19,26 +19,38 @@
 
 Q_EXPORT_PLUGIN2(ClamityMemoryPlugin, ClamityMemory);
 
-ClamityMemory::ClamityMemory() {}
+ClamityMemory::ClamityMemory() { errorReported = ERROR_NONE_INIT;
+                                 testLevel = TEST_ERROR;
+                             }
 ClamityMemory::~ClamityMemory() {}
 
 std::string ClamityMemory::suiteName() const {
     return "clamity memory";
 }
 
-void  ClamityMemory::processError(bool isError, Clamity &subject, std::string test) {
-    if(!isError) {
-        subject.testrun(test,isError);
-        subject.testdiag(getErrorString(getErrorType(this->errorReported)));
-    }
-}
-
 void ClamityMemory::runTests(Clamity &subject, TestLevel level) {
+
     switch (level) {
     case CORE:
+
         testAlloc(subject);
-        processError(memBasic(subject),subject,"Memory Basic");
-        memBasicAnd(subject);
+
+        if(subject.processError (memBasic(subject),errorReported,
+                                 testLevel,"Memory Basic")) {
+            //Ok We got here because Clamity is asking for more
+            //details
+            subject.testdiag("See Log file fore more details");
+        }
+
+        if(subject.processError (memBasicAnd(subject),errorReported,
+                                 testLevel,"Memory AND tests")) {
+            subject.testdiag("See Log file for more details");
+        }
+
+
+
+
+
         break;
 
     case EXTRA:

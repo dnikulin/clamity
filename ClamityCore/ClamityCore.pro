@@ -20,7 +20,11 @@ SOURCES +=                      \
     Info.cc                     \
     Logger.cc                   \
     Tools.cc                    \
-    ReportService.cc
+    ReportService.cc \
+    Clamity.cc
 
 LIBS +=                         \
-    -framework OpenCL
+    -lOpenCL
+
+RESOURCES += \
+    ErrorStrings.qrc
