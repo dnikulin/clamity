@@ -99,8 +99,8 @@ std::string getErrorString(ErrorTypes errorLevel) {
 bool Clamity::processError(bool isError,const ErrorTypes errorClass,
                                         const TestReportLevel errLevel,
                                         std::string test) {
+    testrun(test,isError);
     if(!isError) {
-        testrun(test,isError);
         if(TEST_ERROR == errLevel )
             return true;
         if(TEST_PANIC == errLevel )
