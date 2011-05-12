@@ -63,6 +63,7 @@ Clamity::Clamity(std::ostream &_logfile,std::ofstream &_reportfile, cl::Device &
     testrun = makeTestOutput( &reportfile );
     testdiag = makeLineOutout( &reportfile );
 
+
 }
 
 void testDevice(Clamity &subject, TestSuites &suites) {
@@ -74,7 +75,7 @@ void testDevice(Clamity &subject, TestSuites &suites) {
     std::string name = subject.device.getInfo<CL_DEVICE_NAME>();
 
     log(LOG_INFO, str(format("Clamity testing started for '%s'") % name));
-
+    subject.testdiag(str(format("Starting Clamity for device '%s'") % name));
     // Log device info
     // In case of a bug report, this is critical
     subject.logInfo();
