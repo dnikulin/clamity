@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Starting Clamity on "$HOSTNAME
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+export PATH=$PATH:.
+#ClamityBatch 2>&1 > clamity_report/$HOSTNAME.txt
+exec -a "ClamityBatch" ClamityBatch "$@";
+
+
