@@ -138,8 +138,8 @@ void ClamityMath::basicFMAD(Clamity &subject) {
     double epsilonErrorMargin = subject.epsilonErrorMargin;
 
 
-    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memSize  = subject.deviceMemoryAvail(device) ;//device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = subject.maxMemoryAllocation (device); //device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
     size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
@@ -225,8 +225,8 @@ void ClamityMath::basicADD(Clamity &subject) {
     cl::CommandQueue queue(context, device);
     double epsilonErrorMargin = subject.epsilonErrorMargin;
 
-    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memSize  = subject.deviceMemoryAvail(device) ;//device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = subject.maxMemoryAllocation (device); //device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
     size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
@@ -351,8 +351,8 @@ void ClamityMath::basicMULT(Clamity &subject) {
     double epsilonErrorMargin = subject.epsilonErrorMargin;
 
 
-    size_t memSize  = device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-    size_t memAlloc = device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
+    size_t memSize  = subject.deviceMemoryAvail(device) ;//device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
+    size_t memAlloc = subject.maxMemoryAllocation (device); //device.getInfo<CL_DEVICE_MAX_MEM_ALLOC_SIZE>();
     size_t maxBuff = subject.recommendMemory(memAlloc,memSize,3) / subject.memoryPoolFraction;
 
     // Work out group size
