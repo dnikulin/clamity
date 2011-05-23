@@ -22,6 +22,7 @@ Q_EXPORT_PLUGIN2(ClamityMathPlugin, ClamityMath);
 ClamityMath::ClamityMath() {
     errorReported = ERROR_NONE_INIT;
     testLevel = TEST_ERROR;
+    testPassed = true;
 }
 
 ClamityMath::~ClamityMath() {}
@@ -34,10 +35,17 @@ void ClamityMath::runTests(Clamity &subject, TestLevel level) {
     switch (level) {
     case CORE:
         testBasic(subject);
-        //basicALU(subject);  -For the moment this test causes crashes
+        if(subject.processError (testPassed,errorReported,testLevel,"Basic Arithmatic"))
+            subject.testdiag("See Log file fore more details");
         basicFMAD(subject);
+        if(subject.processError (testPassed,errorReported,testLevel,"Basic FMAD"))
+            subject.testdiag("See Log file fore more details");
         basicADD(subject);
+        if(subject.processError (testPassed,errorReported,testLevel,"Basic Addition"))
+            subject.testdiag("See Log file fore more details");
         basicMULT(subject);
+        if(subject.processError (testPassed,errorReported,testLevel,"Basic Multiplication"))
+            subject.testdiag("See Log file fore more details");
         break;
 
     case EXTRA:

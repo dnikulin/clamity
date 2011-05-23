@@ -27,6 +27,7 @@ class ClamityMath : public QObject, public TestSuite {
 private:
     TestReportLevel testLevel;
     ErrorTypes errorReported;
+    bool testPassed;
 
 public:
 

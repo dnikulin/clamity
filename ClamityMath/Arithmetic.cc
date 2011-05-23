@@ -196,14 +196,22 @@ void ClamityMath::basicFMAD(Clamity &subject) {
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
         log(LOG_PANIC, str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(error.err());
+        testPassed=false;
         return;
     }
 
     log(LOG_INFO,"Verifying results");
-    if (!CheckResults(data.data(), results.data(), vecCount, log,epsilonErrorMargin))
+    if (!CheckResults(data.data(), results.data(), vecCount, log,epsilonErrorMargin)) {
+       testPassed = false;
+       testLevel = TEST_ERROR;
        log(LOG_ERROR,"  Test Failed!");
-    else
+   }
+    else {
        log(LOG_INFO,"  Test Passed");
+       testPassed = true;
+   }
 }
 
 void ClamityMath::basicADD(Clamity &subject) {
@@ -265,6 +273,9 @@ void ClamityMath::basicADD(Clamity &subject) {
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
         log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(error.err());
+        testPassed=false;
         return;
     }
 
@@ -278,6 +289,8 @@ void ClamityMath::basicADD(Clamity &subject) {
             good = false;
             log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have: %f want: %f diff: %f epsilon: %f)") % i \
                     % have % want %(have-want ) % epsilonErrorMargin));
+            testPassed = false;
+            testLevel = TEST_ERROR;
             return;
         }
     }
@@ -307,13 +320,22 @@ void ClamityMath::basicADD(Clamity &subject) {
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
         log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(error.err());
+        testPassed=false;
         return;
     }
 
-    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin))
-       log(LOG_ERROR,"  Test Failed!");
-    else
-       log(LOG_INFO,"  Test Passed");
+    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin)) {
+        testPassed = false;
+        log(LOG_ERROR,"  Test Failed!");
+        testLevel = TEST_ERROR;
+
+    }
+     else {
+        log(LOG_INFO,"  Test Passed");
+        testPassed = true;
+    }
 
 }
 
@@ -380,6 +402,9 @@ void ClamityMath::basicMULT(Clamity &subject) {
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
         log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(error.err());
+        testPassed=false;
         return;
     }
 
@@ -392,6 +417,8 @@ void ClamityMath::basicMULT(Clamity &subject) {
             good = false;
             log(LOG_ERROR,str(format("Test Failed --- Incorrect value at %d  (have: %f want: %f diff: %f epsilon: %f)") % i \
                     % have % want %(have-want ) % epsilonErrorMargin));
+            testPassed = false;
+            testLevel = TEST_ERROR;
             return;
         }
     }
@@ -417,12 +444,21 @@ void ClamityMath::basicMULT(Clamity &subject) {
         queue.enqueueReadBuffer(memoryC, CL_TRUE, 0, memorySize, data.data());
     } catch (cl::Error error) {
         log(LOG_PANIC,str(format("Test Failed --- %s '( %s)'") % error.what() % error.err()));
+        testLevel = TEST_PANIC;
+        errorReported = getErrorType(error.err());
+        testPassed=false;
         return;
     }
 
-    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin))
-       log(LOG_ERROR,"  Test Failed!");
-    else
-       log(LOG_INFO,"  Test Passed");
+    if (!CheckResults(data.data(), results.data(), vecCount, log, epsilonErrorMargin)) {
+        testPassed = false;
+        log(LOG_ERROR,"  Test Failed!");
+        testLevel = TEST_ERROR;
+
+    }
+     else {
+        log(LOG_INFO,"  Test Passed");
+        testPassed = true;
+    }
 
 }

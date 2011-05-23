@@ -63,9 +63,12 @@ void ClamityMath::testBasic(Clamity &subject) {
         if (have != want) {
             good = false;
             log(LOG_ERROR, str(format("    Incorrect at offset %d (have: %d want: %d) ") % i % have % want));
+            testPassed = false;
+            testLevel = TEST_ERROR;
         }
     }
 
     if (good == true)
         log(LOG_INFO,"    Passed");
+    testPassed = true;
 }
