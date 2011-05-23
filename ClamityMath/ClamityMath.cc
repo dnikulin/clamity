@@ -19,7 +19,11 @@
 
 Q_EXPORT_PLUGIN2(ClamityMathPlugin, ClamityMath);
 
-ClamityMath::ClamityMath() {}
+ClamityMath::ClamityMath() {
+    errorReported = ERROR_NONE_INIT;
+    testLevel = TEST_ERROR;
+}
+
 ClamityMath::~ClamityMath() {}
 
 std::string ClamityMath::suiteName() const {

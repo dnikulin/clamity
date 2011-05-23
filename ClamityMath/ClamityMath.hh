@@ -24,6 +24,10 @@ class ClamityMath : public QObject, public TestSuite {
     Q_OBJECT;
     Q_INTERFACES(TestSuite);
 
+private:
+    TestReportLevel testLevel;
+    ErrorTypes errorReported;
+
 public:
 
     ClamityMath();
