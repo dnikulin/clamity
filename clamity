@@ -1,8 +1,10 @@
 #!/bin/bash
 
+export CLAMITY_INSTALL_PATH=  #Clamity install path
+
 echo "Starting Clamity on "$HOSTNAME
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-export PATH=$PATH:.
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CLAMITY_INSTALL_PATH
+export PATH=$PATH:$CLAMITY_INSTALL_PATH
 #ClamityBatch 2>&1 > clamity_report/$HOSTNAME.txt
 exec -a "ClamityBatch" ClamityBatch "$@";
 
