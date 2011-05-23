@@ -74,8 +74,8 @@ public:
     unsigned int deviceMemoryAvail(cl::Device &device);
 
     //ReportService.cc
-    bool processError(bool isError,const ErrorTypes errorClass,
-                                   const TestReportLevel errLevel,
+    bool processError(bool isError,ErrorTypes &errorClass,
+                                   TestReportLevel &errLevel,
                                    std::string test);
 };
 

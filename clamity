@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CLAMITY_INSTALL_PATH=  #Clamity install path
+export CLAMITY_INSTALL_PATH=/home/myrddian/Projects/clamity/Release  #Clamity install path
 
 echo "Starting Clamity on "$HOSTNAME
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CLAMITY_INSTALL_PATH

@@ -96,8 +96,8 @@ std::string getErrorString(ErrorTypes errorLevel) {
 
 
 
-bool Clamity::processError(bool isError,const ErrorTypes errorClass,
-                                        const TestReportLevel errLevel,
+bool Clamity::processError(bool isError,ErrorTypes &errorClass,
+                                        TestReportLevel &errLevel,
                                         std::string test) {
     testrun(test,isError);
     if(!isError) {
