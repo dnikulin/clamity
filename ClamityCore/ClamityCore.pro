@@ -26,7 +26,7 @@ SOURCES +=                      \
     ClamityConfig.cc
 
 LIBS +=                         \
-    -framework OpenCL          \
+    -lOpenCL                  \
     -L/opt/local/lib          \
     -lboost_program_options     \
     -lboost_system              \
