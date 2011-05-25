@@ -22,7 +22,7 @@
 
 #include "MemoryTools.hh"
 #include "ReportService.hh"
-
+#include "ClamityConfig.hh"
 
 
 // Structure to bind together common objects during testing

@@ -30,6 +30,7 @@
 #include <boost/asio/ip/host_name.hpp>
 #include "Clamity.hh"
 
+
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     Q_UNUSED(app);
@@ -49,6 +50,15 @@ int main(int argc, char **argv) {
     std::ofstream reportfile;
     std::ostream *outstream;
 
+    std::cout << "Clamity OpenCL Testing platform version 0.5.0a" <<std::endl;
+    std::cout << "copyright Enzo Reyes, Dmitri Nikulin Licenced under GPLv3" <<std::endl;
+    std::cout << "See the file COPYING for details" <<std::endl;
+    std::cout << std::endl;
+
+
+    //Find the Clamity Config file and read it in
+
+
     boost::program_options::options_description cmdDescription("Allowed Options");
     cmdDescription.add_options()("help","lists command line arguments and how to use clamity")
                    ("error-epsilon",boost::program_options::value<double>(&errorEpsilon)->default_value(errorEpsilonDefault),
@@ -62,6 +72,7 @@ int main(int argc, char **argv) {
                    ("max-mem-div",boost::program_options::value<unsigned int>(&maxMemDiv)->default_value(maxMemDivDefault),
                     "Divides any buffer allocation calculation by this size useful for tests that over allocate")
                    ("skip-cpu","Skip the CPU tests")
+                   ("create-config","Create a default config file")
                    ("log-tofile","writes the log output to a file rather than stdout")
                    ("log-level",boost::program_options::value<unsigned int>(&logLevel)->default_value(1),
                     "Determines the logging verbosity of clamity");
@@ -71,11 +82,14 @@ int main(int argc, char **argv) {
     boost::program_options::notify(vm);
 
     if(vm.count("help")) {
-        std::cout << "Clamity OpenCL Testing platform version 0.5.0a" <<std::endl;
-        std::cout << "copyright Enzo Reyes, Dmitri Nikulin Licenced under GPLv3" <<std::endl;
-        std::cout << "See the file COPYING for details" <<std::endl;
-        std::cout << std::endl;
         std::cout << cmdDescription <<std::endl;
+        return 0;
+    }
+
+    if(vm.count("create-config")) {
+        std::cout << "Creatating Clamity config file with defaults"<<std::endl;
+        std::cout << "File Created......"<<std::endl;
+        ClamityConfig::CreateDefault(qApp->applicationDirPath().toAscii());
         return 0;
     }
 
